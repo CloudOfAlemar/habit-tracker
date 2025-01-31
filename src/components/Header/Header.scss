@@ -1,0 +1,61 @@
+
+@use '../../styles/_variables' as vars;
+
+
+.topnav{
+  padding: 2rem;
+  background-color: vars.$white-off;
+  position: relative;
+
+  &__container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  &__brand {
+    font-size: 2.4rem;
+    display: flex;
+    align-items: center;
+  }
+
+  &__brand-icon,
+  &__burger-icon {
+    height: 2.8rem;
+    pointer-events: none;
+  }
+
+  &__brand-icon {
+    margin-right: 1.2rem;
+  }
+
+  &__burger-btn {
+    display: flex;
+    background-color: transparent;
+    border: none;
+    cursor: pointer;
+  }
+
+  &-list {
+    background-color: vars.$white-off;
+    position: absolute;
+    top: 100%;
+    left: 0;
+    width: 100%;
+    z-index: 100;
+    overflow: hidden;
+    transition: max-height 300ms ease-in-out;
+    border-radius: 0 0 8px 8px;
+  }
+
+  &-list__link {
+    display: block;
+    padding: 1.6rem 2rem;
+    font-size: 2rem;
+    color: vars.$purple-gray;
+  }
+}
+
+.bottom-border {
+  border-bottom: 2px solid vars.$gray-light;
+}

@@ -1,0 +1,615 @@
+
+@use '../../styles/_variables' as vars;
+
+.view {
+  padding: 3.2rem 2rem;
+
+  &__header {
+    margin-bottom: 3.2rem;
+  }
+
+  &__heading {
+    font-size: 3.6rem;
+    font-weight: 400;
+    text-align: center;
+
+    &-alt-color {
+      color: vars.$purple-blue;
+    }
+  }
+
+  &__single {
+    display: flex;
+    flex-direction: column;
+    gap: 6rem;
+    overflow: auto;
+  }
+}
+
+.view-dropdown {
+  max-width: 36rem;
+  margin: auto;
+  position: relative;
+  margin-bottom: 4rem;
+
+  &__toggler {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 2rem;
+    background-color: transparent;
+    color: vars.$purple-gray;
+    font-size: 2.4rem;
+    padding: .6em 1em;
+    border: none;
+    width: 100%;
+    font-weight: 300;
+
+    &-caret-icon {
+      height: 2rem;
+    }
+  }
+
+  &__list {
+    border: 1px solid vars.$gray-light;
+    border-radius: 4px;
+    overflow: hidden;
+    position: absolute;
+    width: 100%;
+
+    max-height: 0px;
+    overflow: hidden;
+    border: none;
+  }
+
+  &__option {
+    width: 100%;
+    background-color: vars.$white-off;
+    color: vars.$purple-gray;
+    border: none;
+    padding: .6em 1em;
+    font-size: 2rem;
+    text-align: left;
+  }
+}
+
+.full-chart {
+  display: flex;
+  gap: 1.6rem;
+  margin-bottom: 10rem;
+
+  // Combined Styles
+  &__habit-side-header,
+  &__tracking-side-header {
+    height: 9.2rem;
+    margin-bottom: 1.2rem;
+  }
+
+  &__habit-side-body,
+  &__tracking-side-body {
+    display: flex;
+    flex-direction: column;
+    gap: 1.2rem;
+  }
+
+  // Individual Styles
+  &__habit-side {
+    width: 12.5rem;
+    overflow: hidden;
+    flex: 0 0 auto;
+  }
+
+  &__habit-side-header {
+    display: flex;
+    align-items: flex-end;
+  }
+  
+  &__add-habit-btn {
+    background-color: vars.$purple-blue;
+    display: block;
+    font-size: 2rem;
+    font-weight: 500;
+    padding: .6em 1em;
+    color: vars.$white-off;
+    text-align: center;
+    border: none;
+    border-radius: .4rem;
+    cursor: pointer;
+  }
+
+  &__habit-title {
+    font-size: 1.6rem;
+    color: vars.$purple-gray-light;
+    white-space: nowrap;
+    height: 3.2rem;
+    display: flex;
+    align-items: center;
+  }
+
+  &__tracking-side {
+    overflow: auto;
+  }
+
+  &__tracking-side-header {
+    display: flex;
+    gap: 1.2rem;
+  }
+
+  &__journal-btn {
+    width: 3.2rem;
+    height: 3.2rem;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: vars.$purple-blue;
+    border: none;
+    border-radius: 4px;
+    margin-bottom: 1.2rem;
+  }
+
+  &__edit-icon {
+    height: 2rem;
+  }
+
+  &__short-date {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    background-color: vars.$white-off;
+    color: vars.$purple-gray;
+    border: 1px solid vars.$purple-gray-light;
+    border-radius: 4px;
+    width: 3.2rem;
+    height: 4.8rem;
+    font-size: 1.6rem;
+    line-height: 2rem;
+  }
+
+  &__bullet-row {
+    display: flex;
+    gap: 1.2rem;
+  }
+
+  &__bullet {
+    width: 3.2rem;
+    height: 3.2rem;
+    border: 1px solid vars.$purple-gray-light;
+    display: inline-block;
+    border-radius: 4px;
+    flex: 0 0 auto;
+  }
+}
+
+.single-chart {
+  padding: 2rem;
+  background-color: vars.$white-off;
+  border-radius: 4px;
+  width: 33.5rem;
+  margin: auto;
+
+  &__header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.6rem;
+  }
+
+  &__heading {
+    font-size: 2.4rem;
+    color: vars.$purple-blue;
+    font-weight: 400;
+    width: 24rem;
+  }
+
+  &__trash-btn {
+    background-color: vars.$white-off;
+    border: 1px solid vars.$purple-gray-light;
+    padding: 1em;
+    border-radius: .4rem;
+
+    &-icon {
+      display: block;
+      height: 2rem;
+    }
+  }
+
+  &__body {
+    display: flex;
+    flex-direction: column;
+    gap: 1.2rem;
+  }
+
+  &__bullet-row {
+    display: flex;
+    gap: 1.2rem;
+  }
+
+  &__bullet {
+    width: 3.2rem;
+    height: 3.2rem;
+    border: 1px solid vars.$purple-gray-light;
+    display: inline-block;
+    border-radius: 4px;
+    flex: 0 0 auto;
+  }
+}
+
+.new-habit-modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  min-height: 100vh;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  display: none;
+
+  // Combined Styles
+  &__add-btn,
+  &__cancel-btn {
+    display: block;
+    font-size: 2rem;
+    font-weight: 500;
+    padding: .6em 1em;
+    color: vars.$white-off;
+    text-align: center;
+    border: none;
+    border-radius: .4rem;
+    cursor: pointer;
+    flex: 1;
+  }
+
+  // Individual Styles
+  &__card {
+    background-color: #FFFFFF;
+    padding: 2rem;
+    border: 1px solid vars.$purple-gray-light;
+    border-radius: .4rem;
+    width: 90%;
+    max-width: 33.5rem;
+  }
+
+  &__habit-control {
+    margin-bottom: 1.6rem;
+  }
+
+  &__label {
+    display: block;
+    font-size: 1.6rem;
+    margin-bottom: .8rem;
+    color: vars.$purple-gray-light;
+  }
+
+  &__input {
+    display: block;
+    font-size: 1.6rem;
+    padding: .6em 1em;
+    width: 100%;
+    border: 1px solid vars.$purple-gray-light;
+    border-radius: 4px;
+    &::placeholder {
+      color: vars.$purple-gray-light;
+    }
+  }
+
+  &__btns {
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 1.2rem;
+  }
+
+  &__add-btn {
+    background-color: vars.$pink;
+  }
+
+  &__cancel-btn {
+    background-color: vars.$purple-gray-light;
+  }
+}
+
+.journal-modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  min-height: 100vh;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  display: none;
+
+  &__card {
+    background-color: #FFFFFF;
+    padding: 2rem;
+    border: 1px solid vars.$purple-gray-light;
+    border-radius: .4rem;
+    width: 90%;
+    max-width: 40rem;
+    max-height: clamp(24rem, 85.7vh, 60rem);
+    overflow: auto;
+  }
+
+  &__header {
+    margin-bottom: 3.2rem;
+  }
+
+  &__heading {
+    font-size: 2.8rem;
+    font-weight: 400;
+  }
+
+  &__body {
+    max-height: clamp(15rem, 53.6vh, 37.5rem);
+    margin-bottom: 3.2rem;
+    overflow: auto;
+  }
+
+  &__btn {
+    width: 100%;
+    background-color: vars.$purple-dark;
+    display: block;
+    font-size: 2rem;
+    font-weight: 500;
+    padding: .6em 1em;
+    color: vars.$white-off;
+    text-align: center;
+    border: none;
+    border-radius: .4rem;
+    cursor: pointer;
+  }
+}
+
+.journal-modal-habit {
+
+  &__header {
+    margin-bottom: .8rem;
+  }
+
+  &__status {
+    margin-bottom: .8rem;
+  }
+  
+  &__status-bullet {
+    width: 3.2rem;
+    height: 3.2rem;
+    border: 1px solid vars.$purple-gray-light;
+    display: inline-block;
+    border-radius: 4px;
+    flex: 0 0 auto;
+  }
+
+  &__heading {
+    font-size: 2.4rem;
+    font-weight: 300;
+  }
+
+  &__note-list {
+    list-style-type: square;
+    padding-left: 2rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1.2rem;
+  }
+
+  &__note {
+    font-size: 1.6rem;
+    font-weight: 300;
+  }
+}
+
+.edit-journal-modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  min-height: 100vh;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  display: none;
+
+  // Individual Styles
+  &__card {
+    background-color: #FFFFFF;
+    padding: 2rem;
+    border: 1px solid vars.$purple-gray-light;
+    border-radius: .4rem;
+    width: 90%;
+    max-width: 40rem;
+    max-height: clamp(24rem, 85.7vh, 60rem);
+    overflow: auto;
+  }
+
+  &__header {
+    margin-bottom: 3.2rem;
+  }
+
+  &__heading {
+    font-size: 2.8rem;
+    font-weight: 400;
+  }
+
+  &__body {
+    max-height: clamp(15rem, 53.6vh, 37.5rem);
+    overflow: auto;
+    margin-bottom: 3.2rem;
+    display: flex;
+    flex-direction: column;
+    gap: 3.2rem;
+  }
+
+  &__save-btn {
+    width: 100%;
+    background-color: vars.$purple-dark;
+    display: block;
+    font-size: 2rem;
+    font-weight: 500;
+    padding: .6em 1em;
+    color: vars.$white-off;
+    text-align: center;
+    border: none;
+    border-radius: .4rem;
+    cursor: pointer;
+  }
+}
+
+.edit-journal-modal-habit {
+
+  &__header {
+    margin-bottom: .8rem;
+  }
+
+  &__status {
+    display: flex;
+    gap: 1.2rem;
+    margin-bottom: .8rem;
+  }
+
+  &__status-bullet {
+    width: 3.2rem;
+    height: 3.2rem;
+    border: 1px solid vars.$purple-gray-light;
+    display: inline-block;
+    border-radius: 4px;
+    flex: 0 0 auto;
+  }
+
+  &__tips {
+    margin-bottom: 1.2rem;
+  }
+
+  &__tip {
+    font-size: 1.6rem;
+    color: vars.$purple-gray;
+    font-weight: 300;
+  }
+
+  &__heading {
+    font-size: 2.4rem;
+  }
+
+  &__note-list {
+    list-style-type: square;
+    padding-left: 2rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1.2rem;
+    margin-bottom: 2.4rem;
+  }
+
+  &__note-content-wrapper {
+    display: flex;
+    align-items: flex-start;
+    gap: 1.2rem;
+  }
+
+  &__note {
+    font-size: 1.6rem;
+    font-weight: 300;
+  }
+
+  &__trash-btn {
+    background-color: vars.$white-off;
+    border: 1px solid vars.$purple-gray-light;
+    padding: 1em;
+    border-radius: .4rem;
+
+    &-icon {
+      display: block;
+      height: 2rem;
+    }
+  }
+
+  &__footer {
+    overflow: hidden;
+  }
+
+  &__note-input {
+    display: block;
+    resize: none;
+    width: 100%;
+    padding: 1rem;
+    font-size: 1.6rem;
+    margin-bottom: 1.2rem;
+  }
+
+  &__add-note-btn {
+    width: 100%;
+    background-color: vars.$purple-blue;
+    display: block;
+    font-size: 2rem;
+    font-weight: 500;
+    padding: .6em 1em;
+    color: vars.$white-off;
+    text-align: center;
+    border: none;
+    border-radius: .4rem;
+    cursor: pointer;
+  }
+}
+
+.delete-habit-modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  min-height: 100vh;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  display: none;
+
+  // Combined Styles
+  &__delete-btn,
+  &__cancel-btn {
+    display: block;
+    font-size: 2rem;
+    font-weight: 500;
+    padding: .6em 1em;
+    color: vars.$white-off;
+    text-align: center;
+    border: none;
+    border-radius: .4rem;
+    cursor: pointer;
+    flex: 1;
+  }
+
+  // Individual Styles
+  &__card {
+    background-color: #FFFFFF;
+    padding: 2rem;
+    border: 1px solid vars.$purple-gray-light;
+    border-radius: .4rem;
+    width: 90%;
+    max-width: 33.5rem;
+  }
+
+  &__msg {
+    font-size: 2.4rem;
+    text-align: center;
+    margin-bottom: 2rem;
+    color: vars.$purple-gray-light;
+  }
+
+  &__btns {
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 1.2rem;
+  }
+
+  &__delete-btn {
+    background-color: vars.$pink;
+  }
+
+  &__cancel-btn {
+    background-color: vars.$purple-gray-light;
+  }
+}

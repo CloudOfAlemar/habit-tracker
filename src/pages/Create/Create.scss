@@ -1,0 +1,235 @@
+
+@use '../../styles/_variables' as vars;
+
+.create {
+  position: relative;
+  padding: 3.2rem 2rem;
+
+  &__header {
+    margin-bottom: 3.2rem;
+  }
+
+  &__heading {
+    font-size: 3.6rem;
+    font-weight: 400;
+    text-align: center;
+
+    &-alt-color {
+      color: vars.$purple-blue;
+    }
+  }
+
+  &__tracker-dropdowns{
+    width: 85%;
+    max-width: 36rem;
+    margin: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+  }
+}
+
+.create-tracker {
+  width: 85%;
+  max-width: 36rem;
+  margin: 0 auto 6rem;
+
+  // Combined Styles
+  &__month-control,
+  &__year-control {
+    margin-bottom: 1.6rem;
+  }
+
+  &__month-label,
+  &__year-label {
+    display: block;
+    font-size: 1.6rem;
+    margin-bottom: .8rem;
+    color: vars.$purple-gray-light;
+  }
+
+  &__month-dropdown,
+  &__year-dropdown {
+    position: relative;
+  }
+
+  &__month-toggler,
+  &__year-toggler {
+    font-size: 1.6rem;
+    padding: .6em 1em;
+    color: vars.$purple-gray;
+    background-color: transparent;
+    border: 1px solid vars.$purple-gray-light;
+    border-radius: 4px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+    &-caret-icon {
+      height: 1.6rem;
+    }
+  }
+
+  &__month-list,
+  &__year-list {
+    border: 1px solid vars.$gray-light;
+    border-radius: 4px;
+    position: absolute;
+    width: 100%;
+    top: calc(100% + 12px);
+    z-index: 100;
+    background-color: #FFFFFF;
+    overflow: hidden;
+
+    // Below is when List is closed
+    max-height: 0;
+    border: none;
+  }
+
+  &__month-btn,
+  &__year-btn {
+    font-size: 1.6rem;
+    padding: .6em 1em;
+    width: 100%;
+    border: none;
+    background-color: vars.$white-off;
+    text-align: left;
+    color: vars.$purple-gray;
+  }
+
+  // Individual Styles
+  &__create-btn {
+    width: 100%;
+    background-color: vars.$purple-blue;
+    display: block;
+    font-size: 2rem;
+    font-weight: 500;
+    padding: .6em 1em;
+    color: vars.$white-off;
+    text-align: center;
+    border: none;
+    border-radius: .4rem;
+    cursor: pointer;
+  }
+}
+
+.tracker-dropdown {
+
+  &__year-toggler {
+    font-size: 1.6rem;
+    padding: .6em 1em;
+    color: vars.$purple-gray;
+    background-color: transparent;
+    border: 1px solid vars.$purple-gray-light;
+    border-radius: 4px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+    &-caret-icon {
+      height: 1.6rem;
+    }
+  }
+
+  &__list {
+    display: flex;
+    flex-direction: column;
+    gap: 1.6rem;
+    padding-top: 2rem;
+  }
+
+  &__item {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 1.2rem;
+  }
+
+  &__link {
+    display: flex;
+    align-items: center;
+    font-size: 1.6rem;
+    padding: .6em 1em;
+    border: 1px solid vars.$purple-gray-light;
+    flex-grow: 1;
+    border-radius: 4px;
+    color: vars.$purple-gray;
+
+    &-arrow-icon {
+      height: 1.6rem;
+      margin-right: 1.2rem;
+    }
+  }
+
+  &__trash-btn {
+    background-color: vars.$white-off;
+    border: 1px solid vars.$purple-gray-light;
+    padding: 1em;
+    border-radius: .4rem;
+
+    &-icon {
+      display: block;
+      height: 2rem;
+    }
+  }
+}
+
+.delete-tracker-modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  min-height: 100vh;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  display: none;
+
+  // Combined Styles
+  &__delete-btn,
+  &__cancel-btn {
+    display: block;
+    font-size: 2rem;
+    font-weight: 500;
+    padding: .6em 1em;
+    color: vars.$white-off;
+    text-align: center;
+    border: none;
+    border-radius: .4rem;
+    cursor: pointer;
+    flex: 1;
+  }
+
+  // Individual Styles
+  &__card {
+    background-color: #FFFFFF;
+    padding: 2rem;
+    border: 1px solid vars.$purple-gray-light;
+    border-radius: .4rem;
+    width: 90%;
+    max-width: 33.5rem;
+  }
+
+  &__msg {
+    font-size: 2.4rem;
+    text-align: center;
+    margin-bottom: 2rem;
+    color: vars.$purple-gray-light;
+  }
+
+  &__btns {
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 1.2rem;
+  }
+
+  &__delete-btn {
+    background-color: vars.$pink;
+  }
+
+  &__cancel-btn {
+    background-color: vars.$purple-gray-light;
+  }
+}

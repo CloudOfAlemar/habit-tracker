@@ -1,0 +1,110 @@
+@use '../../styles/_variables' as vars;
+
+.signup {
+  padding: 3.2rem 2rem;
+
+  &__header {
+    margin-bottom: 3.2rem;
+  }
+
+  &__heading {
+    font-size: 3.6rem;
+    font-weight: 400;
+    text-align: center;
+
+    &-alt-color {
+      color: vars.$purple-blue;
+    }
+  }
+
+  &__login-link {
+    display: block;
+    width: fit-content;
+    margin: auto;
+    font-size: 2rem;
+    color: vars.$purple-blue;
+  }
+}
+
+.signup-form {
+  width: 85%;
+  max-width: 38rem;
+  margin: 0 auto 2.8rem;
+
+  // Combined Styles
+  &__username-control,
+  &__password-control,
+  &__confirm-control {
+    margin-bottom: 1.6rem;
+  }
+
+  &__username-label,
+  &__password-label,
+  &__confirm-label {
+    display: block;
+    font-size: 1.6rem;
+    margin-bottom: .8rem;
+    color: vars.$purple-gray-light;
+  }
+
+  &__password-input-wrapper,
+  &__confirm-input-wrapper {
+    position: relative;
+    margin-bottom: .8rem;
+  }
+
+  &__username-input,
+  &__password-input,
+  &__confirm-input {
+    display: block;
+    font-size: 1.6rem;
+    padding: .6em 1em;
+    width: 100%;
+    border: 1px solid vars.$purple-gray-light;
+    border-radius: 4px;
+    &::placeholder {
+      color: vars.$purple-gray-light;
+    }
+  }
+
+  &__password-eye-btn,
+  &__confirm-eye-btn {
+    background-color: transparent;
+    border: none;
+    position: absolute;
+    top: 50%;
+    right: 2rem;
+    transform: translateY(-50%);
+    cursor: pointer;
+  }
+
+  &__password-eye-icon,
+  &__confirm-eye-icon {
+    display: block;
+    height: 2rem;
+  }
+
+  &__username-minimum-msg,
+  &__username-duplicate-msg,
+  &__password-pattern-msg,
+  &__confirm-match-msg {
+    font-size: 1.6rem;
+    color: vars.$pink;
+    display: block;
+  }
+
+  // Individual Styles
+  &__btn {
+    width: 100%;
+    background-color: vars.$purple-dark;
+    display: block;
+    font-size: 2rem;
+    font-weight: 500;
+    padding: .6em 1em;
+    color: vars.$white-off;
+    text-align: center;
+    border: none;
+    border-radius: .4rem;
+    cursor: pointer;
+  }
+}

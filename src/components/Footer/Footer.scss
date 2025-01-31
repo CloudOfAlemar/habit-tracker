@@ -1,0 +1,16 @@
+
+@use '../../styles/_variables' as vars;
+
+.footer {
+  padding: 3.2rem 2rem;
+}
+
+.copyright {
+  &__text {
+    font-size: 1.6rem;
+    margin: auto;
+    text-align: center;
+    color: vars.$purple-gray-light;
+    font-weight: 300;
+  }
+}

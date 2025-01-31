@@ -1,0 +1,72 @@
+
+@use '../../styles/_variables' as vars;
+
+.home {
+  padding: 3.2rem 2rem;
+
+  // Combined Styles
+  &__login-btn,
+  &__signup-btn,
+  &__create-btn,
+  &__view-btn {
+    width: 85%;
+    max-width: 32rem;
+    margin: auto;
+    display: block;
+    border: none;
+    border-radius: .4rem;
+    font-size: 2rem;
+    font-weight: 500;
+    padding: .6em 1em;
+    text-align: center;
+    color: vars.$white-off;
+    cursor: pointer;
+  }
+
+  &__login-btn,
+  &__create-btn {
+    margin-bottom: 1.2rem;
+    background-color: vars.$purple-blue;
+  }
+
+  &__signup-btn,
+  &__view-btn {
+    background-color: vars.$purple-dark;
+  }
+
+  // Individual Styles
+
+  &__img-wrapper {
+    margin-bottom: 3.2rem;
+  }
+
+  &__graph-img {
+    display: block;
+    margin: auto;
+    width: 85%;
+    max-width: 32rem;
+  }
+
+  &__text-content {
+    margin: 0 auto 3.6rem;
+    text-align: center;
+  }
+
+  &__heading {
+    font-size: 3.6rem;
+    margin-bottom: .8rem;
+    font-weight: 400;
+
+    &-alt-color {
+      color: vars.$purple-blue;
+    }
+  }
+
+  &__description {
+    font-size: 1.6rem;
+    font-weight: 300;
+    color: vars.$purple-gray;
+    max-width: 47.5rem;
+    margin: auto;
+  }
+}
