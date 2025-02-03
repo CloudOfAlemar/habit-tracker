@@ -8,6 +8,8 @@
   position: relative;
 
   &__container {
+    max-width: 1200px;
+    margin: auto;
     display: flex;
     justify-content: space-between;
     align-items: center;

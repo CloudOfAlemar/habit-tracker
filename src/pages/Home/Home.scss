@@ -25,7 +25,7 @@
 
   &__login-btn,
   &__create-btn {
-    margin-bottom: 1.2rem;
+    margin-bottom: clamp(1.2rem, 3.2vw, 1.6rem);
     background-color: vars.$purple-blue;
   }
 
@@ -36,15 +36,20 @@
 
   // Individual Styles
 
+  &__container {
+    max-width: 1200px;
+    margin: auto;
+  }
+
   &__img-wrapper {
-    margin-bottom: 3.2rem;
+    margin-bottom: clamp(3.2rem, 8.5vw, 3.6rem);
   }
 
   &__graph-img {
     display: block;
     margin: auto;
     width: 85%;
-    max-width: 32rem;
+    max-width: 36rem;
   }
 
   &__text-content {
@@ -53,7 +58,7 @@
   }
 
   &__heading {
-    font-size: 3.6rem;
+    font-size: clamp(3.6rem, 9.9vw, 4rem);
     margin-bottom: .8rem;
     font-weight: 400;
 
@@ -66,7 +71,51 @@
     font-size: 1.6rem;
     font-weight: 300;
     color: vars.$purple-gray;
-    max-width: 47.5rem;
+    max-width: 52.5rem;
     margin: auto;
+  }
+}
+
+@media screen and (min-width: 1024px) {
+  .home {
+    padding: 12rem clamp(3.6rem, 3.5vw, 6.4rem) 6.4rem;
+
+    // Combined Styles
+    &__login-btn,
+    &__signup-btn,
+    &__create-btn,
+    &__view-btn {
+      margin-left: 0;
+    }
+
+    // Individual Styles
+    &__container {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    &__img-wrapper {
+      order: 2;
+      margin-bottom: 0;
+    }
+
+    &__graph-img {
+      margin: 0;
+      width: 100%;
+      max-width: clamp(45rem, 44vw, 52rem);
+    }
+
+    &__text-content {
+      text-align: left;
+    }
+
+    &__heading {
+      font-size: clamp(5.6rem, 5.5vw, 7.2rem);
+    }
+
+    &__description {
+      max-width: 47.5rem;
+    }
   }
 }
