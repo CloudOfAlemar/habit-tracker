@@ -25,6 +25,9 @@ function Header() {
   const topnavListRef = useRef(null);
   const topnavBurgerBtnRef = useRef(null);
 
+  // Variables
+  const topnavListLinkTabable = topnavListState.isOpen || (windowWidth >= 1024) ? 0 : -1;
+
   // Functions
   const handleTopnavListToggle = () => {
     setTopnavListState(previousState => {
@@ -70,8 +73,6 @@ function Header() {
       window.removeEventListener("resize", handleResizeWidth);
     }
   }, []);
-
-  const topnavListLinkTabable = topnavListState.isOpen || (windowWidth >= 1024) ? 0 : -1;
 
   return (
     <header className="header">
