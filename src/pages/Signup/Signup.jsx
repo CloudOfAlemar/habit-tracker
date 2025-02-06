@@ -1,10 +1,31 @@
 
 import { Link } from 'react-router-dom';
+import { useState } from 'react';
 
 import './Signup.scss';
 import eyeIcon from '../../assets/eye-icon.svg';
 
 function Signup() {
+
+  const [isPasswordVisible, setIsPasswordVisible] = useState(false);
+  const [isConfirmVisible, setIsConfirmVisible] = useState(false);
+
+  const handlePasswordVisibilityToggle = (event) => {
+    event.preventDefault();
+    setIsPasswordVisible(previousState => !previousState);
+  }
+
+  const handleConfirmVisibilityToggle = (event) => {
+    event.preventDefault();
+    setIsConfirmVisible(previousState => !previousState);
+  }
+
+  // const handlePasswordVisibilityToggle = (event) => {
+  //   event.preventDefault();
+  //   const relatedInput = event.target.closest("div").querySelector("input");
+  //   relatedInput.type = relatedInput.type === "password" ? "text" : "password";
+  // }
+
   return(
     <main className="main">
       <section className="signup">
@@ -38,12 +59,12 @@ function Signup() {
               <div className="signup-form__password-control">
                 <label htmlFor="signup-form__password-input" className="signup-form__password-label">Password</label>
                 <div className="signup-form__password-input-wrapper">
-                  <input type="password"
+                  <input type={isPasswordVisible ? "text" : "password"}
                     id="signup-form__password-input"
                     className="signup-form__password-input"
                     placeholder="********"
                   />
-                  <button className="signup-form__password-eye-btn">
+                  <button className="signup-form__password-eye-btn" onClick={handlePasswordVisibilityToggle}>
                     <img src={eyeIcon} alt="Eye icon." className="signup-form__password-eye-icon" />
                   </button>
                 </div>
@@ -56,12 +77,12 @@ function Signup() {
               <div className="signup-form__confirm-control">
                 <label htmlFor="signup-form__confirm-input" className="signup-form__confirm-label">Confirm</label>
                 <div className="signup-form__confirm-input-wrapper">
-                  <input type="password"
+                  <input type={isConfirmVisible ? "text" : "password"}
                     id="signup-form__confirm-input"
                     className="signup-form__confirm-input"
                     placeholder="********"
                   />
-                  <button className="signup-form__confirm-eye-btn">
+                  <button className="signup-form__confirm-eye-btn" onClick={handleConfirmVisibilityToggle}>
                     <img src={eyeIcon} alt="Eye icon." className="signup-form__confirm-eye-icon" />
                   </button>
                 </div>

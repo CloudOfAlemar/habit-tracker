@@ -1,12 +1,21 @@
 
 
 import { Link } from 'react-router-dom';
+import { useState } from 'react';
 
 import './Login.scss';
 
 import eyeIcon from '../../assets/eye-icon.svg';
 
 function Login() {
+
+  const [isPasswordVisible, setIsPasswordVisible] = useState(false);
+
+  const handlePasswordViewToggle = (event) => {
+    event.preventDefault();
+    setIsPasswordVisible(previousState => !previousState);
+  }
+
   return (
     <main className="main">
       <section className="login">
@@ -39,12 +48,12 @@ function Login() {
               <div className="login-form__password-control">
                 <label htmlFor="login-form__password-input" className="login-form__password-label">Password</label>
                 <div className="login-form__password-input-wrapper">
-                  <input type="password"
+                  <input type={isPasswordVisible ? "text" : "password"}
                     id="login-form__password-input"
                     className="login-form__password-input"
                     placeholder="********"
                   />
-                  <button className="login-form__password-eye-btn">
+                  <button className="login-form__password-eye-btn" onClick={handlePasswordViewToggle}>
                     <img src={eyeIcon} alt="Eye icon." className="login-form__password-eye-icon" />
                   </button>
                 </div>
