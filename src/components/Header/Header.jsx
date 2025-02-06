@@ -1,3 +1,5 @@
+
+// Imports
 import { Link } from 'react-router-dom';
 import { useState, useRef, useEffect } from 'react';
 
@@ -6,49 +8,70 @@ import './Header.scss';
 import graphIcon from '../../assets/graph-icon.svg';
 import burgerIcon from '../../assets/burger-icon.svg';
 
+// Component
 function Header() {
-  // NOTE: Explore useState values as Objects, not only single values.
-  const [isTopnavListOpen, setIsTopnavListOpen] = useState(false);
-  const [topnavListHeight, setTopnavListHeight] = useState("0px");
+  
+  // States
+  const [topnavListState, setTopnavListState] = useState({
+    isOpen: false,
+    styles: {
+      maxHeight: "0px",
+      borderBottom: "none"
+    }
+  });
+  const [windowWidth, setWindowWidth] = useState(window.innerWidth);
 
-
+  // Refs
   const topnavListRef = useRef(null);
   const topnavBurgerBtnRef = useRef(null);
 
+  // Functions
   const handleTopnavListToggle = () => {
-    setIsTopnavListOpen(!isTopnavListOpen);
+    setTopnavListState(previousState => {
+      const isOpen = !previousState.isOpen;
+      return {
+        ...previousState,
+        isOpen,
+        styles: {
+          ...previousState.styles,
+          maxHeight: isOpen ? `${topnavListRef.current.scrollHeight}px` : "0px",
+          borderBottom: isOpen ? "2px solid #EFEFEF" : "none"
+        }
+      };
+    });
   }
 
-  const handleTopnavListClose = () => {
-    setIsTopnavListOpen(false);
-  }
-
+  // Effects
   useEffect(() => {
-    if(isTopnavListOpen) {
-      const dynamicTopnavListHeight = `${topnavListRef.current.scrollHeight}px`;
-      setTopnavListHeight(dynamicTopnavListHeight);
-    } else {
-      setTopnavListHeight("0px");
-    }
 
-    const handleTopnavListOutsideClick = (event) => {
+    const handleTopnavListClose = (event) => {
       if(
-        isTopnavListOpen &&
-        !topnavListRef.current.contains(event.target) &&
+        topnavListState.isOpen &&
+        topnavListRef.current &&
         !topnavBurgerBtnRef.current.contains(event.target)
       ) {
-        setIsTopnavListOpen(false);
-        setTopnavListHeight("0px");
+        handleTopnavListToggle();
       }
     }
-
-    document.addEventListener("mousedown", handleTopnavListOutsideClick);
+    document.addEventListener("mousedown", handleTopnavListClose);
 
     return () => {
-      document.removeEventListener("mousedown", handleTopnavListOutsideClick);
+      document.removeEventListener("mousedown", handleTopnavListClose);
     }
-  }, [isTopnavListOpen]);
+  }, [topnavListState.isOpen]);
 
+  useEffect(() => {
+    const handleResizeWidth = () => {
+      setWindowWidth(window.innerWidth);
+    };
+    window.addEventListener("resize", handleResizeWidth);
+
+    return () => {
+      window.removeEventListener("resize", handleResizeWidth);
+    }
+  }, []);
+
+  const topnavListLinkTabable = topnavListState.isOpen || (windowWidth >= 1024) ? 0 : -1;
 
   return (
     <header className="header">
@@ -76,57 +99,51 @@ function Header() {
 
           {/* Topnav List */}
           <ul
-            className={`topnav-list ${isTopnavListOpen ? "bottom-border": ""}`} 
+            className={`topnav-list`}
+            style={(windowWidth < 1024) ? topnavListState.styles : {maxHeight: "fit-content", borderBottom: "none"}}
             ref={topnavListRef}
-            style={{maxHeight: topnavListHeight}}
-            aria-hidden={!isTopnavListOpen}
+            aria-hidden={topnavListState.isOpen}
           >
             <li className="topnav-list__item">
               <Link 
                 to={"/"}
                 className="topnav-list__link"
-                onClick={handleTopnavListClose}
-                tabIndex={isTopnavListOpen? 0 : -1}
+                tabIndex={topnavListLinkTabable}
               >Home</Link>
-            </li>
-            <li className="topnav-list__item">
-              <Link
-                to={"/login"}
-                className="topnav-list__link"
-                onClick={handleTopnavListClose}
-                tabIndex={isTopnavListOpen? 0 : -1}
-              >Login</Link>
-            </li>
-            <li className="topnav-list__item">
-              <Link
-                to={"/signup"}
-                className="topnav-list__link"
-                onClick={handleTopnavListClose}
-                tabIndex={isTopnavListOpen? 0 : -1}
-              >Sign Up</Link>
             </li>
             <li className="topnav-list__item">
               <Link
                 to={"/create"}
                 className="topnav-list__link"
-                onClick={handleTopnavListClose}
-                tabIndex={isTopnavListOpen? 0 : -1}
+                tabIndex={topnavListLinkTabable}
               >Create</Link>
             </li>
             <li className="topnav-list__item">
               <Link
                 to={"/view"}
                 className="topnav-list__link"
-                onClick={handleTopnavListClose}
-                tabIndex={isTopnavListOpen? 0 : -1}
+                tabIndex={topnavListLinkTabable}
               >View</Link>
+            </li>
+            <li className="topnav-list__item">
+              <Link
+                to={"/login"}
+                className="topnav-list__link"
+                tabIndex={topnavListLinkTabable}
+              >Login</Link>
+            </li>
+            <li className="topnav-list__item">
+              <Link
+                to={"/signup"}
+                className="topnav-list__link"
+                tabIndex={topnavListLinkTabable}
+              >Sign Up</Link>
             </li>
             {/* <li className="topnav-list__item">
               <Link
                 to={"/"}
                 className="topnav-list__link"
-                onClick={handleTopnavListClose}
-                tabIndex={isTopnavListOpen? 0 : -1}
+                tabIndex={topnavListLinkTabable}
               >Logout</Link>
             </li> */}
           </ul>

@@ -233,3 +233,15 @@
     background-color: vars.$purple-gray-light;
   }
 }
+
+@media screen and (min-width: 1024px) {
+  .create {
+
+    &__tracker-dropdowns {
+      max-width: clamp(36rem, 35.2vw, 44rem);
+    }
+  }
+  .create-tracker {
+    max-width: clamp(36rem, 35.2vw, 44rem);
+  }
+}
