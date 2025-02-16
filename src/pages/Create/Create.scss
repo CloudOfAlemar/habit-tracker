@@ -65,14 +65,29 @@
     justify-content: space-between;
     align-items: center;
     width: 100%;
+    margin-bottom: .8rem;
     &-caret-icon {
       height: 1.6rem;
+      transition: transform 300ms ease-in-out;
+      
+      &--rotate {
+        transform: rotate(-180deg);
+      }
+    }
+
+    &-error-msg {
+      font-size: 1.6rem;
+      color: vars.$pink;
+      display: none;
+
+      &--show {
+        display: block;
+      }
     }
   }
 
   &__month-list,
   &__year-list {
-    border: 1px solid vars.$gray-light;
     border-radius: 4px;
     position: absolute;
     width: 100%;
@@ -80,10 +95,9 @@
     z-index: 100;
     background-color: #FFFFFF;
     overflow: hidden;
-
-    // Below is when List is closed
-    max-height: 0;
-    border: none;
+    transition: 
+      max-height 300ms ease-in-out,
+      border 300ms ease-in-out;
   }
 
   &__month-btn,
@@ -98,6 +112,10 @@
   }
 
   // Individual Styles
+  &__month-list {
+    z-index: 200;
+  }
+
   &__create-btn {
     width: 100%;
     background-color: vars.$purple-blue;
@@ -136,6 +154,7 @@
     flex-direction: column;
     gap: 1.6rem;
     padding-top: 2rem;
+    overflow: hidden;
   }
 
   &__item {

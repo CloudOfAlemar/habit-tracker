@@ -20,12 +20,6 @@ function Signup() {
     setIsConfirmVisible(previousState => !previousState);
   }
 
-  // const handlePasswordVisibilityToggle = (event) => {
-  //   event.preventDefault();
-  //   const relatedInput = event.target.closest("div").querySelector("input");
-  //   relatedInput.type = relatedInput.type === "password" ? "text" : "password";
-  // }
-
   return(
     <main className="main">
       <section className="signup">
