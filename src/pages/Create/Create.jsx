@@ -10,7 +10,8 @@ import linkArrowIcon from '../../assets/link-arrow-icon.svg';
 function Create() {
 
   // State Variables
-  const [trackersList, setTrackersList] = useState([]);
+  // const [trackersList, setTrackersList] = useState([]);
+  const [trackersList, setTrackersList] = useState(JSON.parse(localStorage.getItem("trackersListStorage")));
   const [trackerSelect, setTrackerSelect] = useState({});
   const [isMonthDropdownOpen, setIsMonthDropdownOpen] = useState(false);
   const [isYearDropdownOpen, setIsYearDropdownOpen] = useState(false);
@@ -134,6 +135,9 @@ function Create() {
   // },[trackerDeleteSelected]);
 
   useEffect(() => {
+
+    localStorage.setItem("trackersListStorage", JSON.stringify(trackersList));
+
     trackersList.forEach(tracker => {
       const year = tracker.year;
       const dropdown = trackerDropdownRefs.current[`trackerDropdown${year}`].current;
@@ -417,7 +421,7 @@ function Create() {
                     className="tracker-dropdown__list"
                     ref={trackerDropdownRefs.current[`trackerDropdown${obj.year}`]}
                     style={{
-                      maxHeight: trackerDropdowns[`isOpen${obj.year}`] ? `${trackerDropdownRefs.current[`trackerDropdown${obj.year}`].current.scrollHeight}px` : "0px",
+                      maxHeight: trackerDropdowns[`isOpen${obj.year}`] && trackerDropdownRefs.current[`trackerDropdown${obj.year}`].current ? `${trackerDropdownRefs.current[`trackerDropdown${obj.year}`].current.scrollHeight}px` : "0px",
                     }}
                   >
                     {obj.months.map((month, trackerItemIndex) => (
