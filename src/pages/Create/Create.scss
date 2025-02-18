@@ -66,6 +66,7 @@
     align-items: center;
     width: 100%;
     margin-bottom: .8rem;
+    cursor: pointer;
     &-caret-icon {
       height: 1.6rem;
       transition: transform 300ms ease-in-out;
@@ -144,8 +145,15 @@
     justify-content: space-between;
     align-items: center;
     width: 100%;
+    transition: margin 300ms ease-in-out;
+    cursor: pointer;
     &-caret-icon {
       height: 1.6rem;
+      transition: transform 300ms ease-in-out;
+
+      &--rotate {
+        transform: rotate(-180deg);
+      }
     }
   }
 
@@ -153,8 +161,8 @@
     display: flex;
     flex-direction: column;
     gap: 1.6rem;
-    padding-top: 2rem;
     overflow: hidden;
+    transition: max-height 300ms ease-in-out;
   }
 
   &__item {
@@ -185,6 +193,7 @@
     border: 1px solid vars.$purple-gray-light;
     padding: 1em;
     border-radius: .4rem;
+    cursor: pointer;
 
     &-icon {
       display: block;
@@ -203,6 +212,7 @@
   display: flex;
   justify-content: center;
   align-items: center;
+  z-index: 200;
   display: none;
 
   // Combined Styles
@@ -250,6 +260,10 @@
 
   &__cancel-btn {
     background-color: vars.$purple-gray-light;
+  }
+
+  &--show{
+    display: flex;
   }
 }
 

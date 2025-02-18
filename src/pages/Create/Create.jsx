@@ -1,5 +1,5 @@
 
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, createRef } from 'react';
 
 import './Create.scss';
 
@@ -15,15 +15,22 @@ function Create() {
   const [isMonthDropdownOpen, setIsMonthDropdownOpen] = useState(false);
   const [isYearDropdownOpen, setIsYearDropdownOpen] = useState(false);
   const [monthTogglerText, setMonthTogglerText] = useState("Month");
-  const [isMonthErrorVisible, setIsMonthErrorVisible] = useState(false);
   const [yearTogglerText, setYearTogglerText] = useState("Year");
+  const [isMonthErrorVisible, setIsMonthErrorVisible] = useState(false);
   const [isYearErrorVisible, setIsYearErrorVisible] = useState(false);
+
+  const [trackerDropdowns, setTrackerDropdowns] = useState({});
+
+  const [trackerDeleteSelected, setTrackerDeleteSelected] = useState({});
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
 
   // Reference Variables
   const monthDropdownRef = useRef(null);
   const monthDropdownListRef = useRef(null);
   const yearDropdownRef = useRef(null);
   const yearDropdownListRef = useRef(null);
+
+  const trackerDropdownRefs = useRef({});
 
   // Variables
   const currentYear = new Date().getFullYear();
@@ -117,6 +124,27 @@ function Create() {
   // useEffect(() => {
   //   console.log( `Tracker Select: `, trackerSelect )
   // }, [trackerSelect]);
+
+  // useEffect(() => {
+  //   console.log( trackerDropdowns )
+  // }, [trackerDropdowns]);
+
+  // useEffect(()=> {
+  //   console.log( trackerDeleteSelected )
+  // },[trackerDeleteSelected]);
+
+  useEffect(() => {
+    trackersList.forEach(tracker => {
+      const year = tracker.year;
+      const dropdown = trackerDropdownRefs.current[`trackerDropdown${year}`].current;
+      if(
+        trackerDropdowns[`isOpen${year}`] &&
+        dropdown
+      ) {
+        dropdown.style.maxHeight = `${dropdown.scrollHeight}px`
+      }
+    });
+  }, [trackersList]);
 
   useEffect(() => {
     const handleClickOutsideMonthDropdown = (event) => {
@@ -352,32 +380,67 @@ function Create() {
           {/* Tracker Dropdowns */}
           <div className="create__tracker-dropdowns">
 
-            {trackersList.map((obj, trackerDropdownIndex) => (
-              <div className="tracker-dropdown" key={trackerDropdownIndex}>
-                <button 
-                  className="tracker-dropdown__year-toggler"
-                  onClick={(event) => {
-                    
-                  }}
-                >
-                  {obj.year}
-                  <img src={caretIcon} alt="Caret arrow." className="tracker-dropdown__year-toggler-caret-icon" /> 
-                </button>
-                <ul className="tracker-dropdown__list">
-                  {obj.months.map((month, trackerItemIndex) => (
-                    <li className="tracker-dropdown__item" key={trackerItemIndex}>
-                      <a href="" className="tracker-dropdown__link">
-                        <img src={linkArrowIcon} alt="Link arrow icon." className="tracker-dropdown__link-arrow-icon" />
-                        {month.name}
-                      </a>
-                      <button className="tracker-dropdown__trash-btn">
-                        <img src={trashIcon} alt="Trash icon." className="tracker-dropdown__trash-btn-icon" />
-                      </button>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            ))}
+            {trackersList.map((obj, trackerDropdownIndex) => {
+              if(!trackerDropdownRefs.current[`trackerDropdown${obj.year}`]) {
+                trackerDropdownRefs.current[`trackerDropdown${obj.year}`] = createRef();
+              }
+              return (
+                <div className="tracker-dropdown" key={trackerDropdownIndex}>
+                  <button 
+                    className="tracker-dropdown__year-toggler"
+                    onClick={() => {
+                      setTrackerDropdowns(previousState => {
+                        const closedDropdowns = 
+                          Object.entries(previousState)
+                          .reduce((acc, [key, value]) => {
+                            acc[key] = false;
+                            return acc;
+                          }, {});
+                        if(previousState[`isOpen${obj.year}`]) {
+                          return closedDropdowns;
+                        } else {
+                          return {...closedDropdowns, [`isOpen${obj.year}`]: true}
+                        }
+                      });
+                    }}
+                    style={{
+                      marginBottom: trackerDropdowns[`isOpen${obj.year}`] ? "2rem" : "0rem"
+                    }}
+                  >
+                    {obj.year}
+                    <img 
+                      src={caretIcon} alt="Caret arrow." 
+                      className={`tracker-dropdown__year-toggler-caret-icon ${trackerDropdowns[`isOpen${obj.year}`] ? "tracker-dropdown__year-toggler-caret-icon--rotate" : ""}`}
+                      /> 
+                  </button>
+                  <ul 
+                    className="tracker-dropdown__list"
+                    ref={trackerDropdownRefs.current[`trackerDropdown${obj.year}`]}
+                    style={{
+                      maxHeight: trackerDropdowns[`isOpen${obj.year}`] ? `${trackerDropdownRefs.current[`trackerDropdown${obj.year}`].current.scrollHeight}px` : "0px",
+                    }}
+                  >
+                    {obj.months.map((month, trackerItemIndex) => (
+                      <li className="tracker-dropdown__item" key={trackerItemIndex}>
+                        <a href="" className="tracker-dropdown__link">
+                          <img src={linkArrowIcon} alt="Link arrow icon." className="tracker-dropdown__link-arrow-icon" />
+                          {month.name}
+                        </a>
+                        <button
+                          className="tracker-dropdown__trash-btn"
+                          onClick={() => {
+                            setTrackerDeleteSelected({year: obj.year, month })
+                            setIsDeleteModalOpen(true);
+                          }}
+                        >
+                          <img src={trashIcon} alt="Trash icon." className="tracker-dropdown__trash-btn-icon" />
+                        </button>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )
+            })}
 
           </div>
 
@@ -385,14 +448,37 @@ function Create() {
       </section>
 
       {/* Delete Tracker Modal */}
-      <div className="delete-tracker-modal">
+      <div 
+        className={`delete-tracker-modal ${isDeleteModalOpen ? "delete-tracker-modal--show" : ""}`}
+      >
         <div className="delete-tracker-modal__card">
           <p className="delete-tracker-modal__msg">
             Delete this tracker?
           </p>
           <div className="delete-tracker-modal__btns">
-            <button className="delete-tracker-modal__delete-btn">Delete</button>
-            <button className="delete-tracker-modal__cancel-btn">Cancel</button>
+            <button
+              className="delete-tracker-modal__delete-btn"
+              onClick={()=> {
+                const updatedTrackersList = trackersList.map(trackerObj => {
+                  const containsYear = trackerObj.year === trackerDeleteSelected.year;
+                  const containsMonth = trackerObj.months.some(monthObj => monthObj.name === trackerDeleteSelected.month.name);
+                  if(containsYear && containsMonth) {
+                    const updatedMonths = trackerObj.months.filter(month => month.name !== trackerDeleteSelected.month.name);
+                    return {...trackerObj, months: [...updatedMonths]};
+                  } else {
+                    return trackerObj;
+                  }
+                });
+
+                const filteredTrackersList = updatedTrackersList.filter(obj => obj.months.length !== 0);
+                setTrackersList(filteredTrackersList);
+                setIsDeleteModalOpen(false);
+              }}
+            >Delete</button>
+            <button 
+              className="delete-tracker-modal__cancel-btn"
+              onClick={() => setIsDeleteModalOpen(false)}  
+            >Cancel</button>
           </div>
         </div>
       </div>
