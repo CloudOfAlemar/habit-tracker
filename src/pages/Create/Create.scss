@@ -274,18 +274,28 @@
 
 @media screen and (min-width: 1024px) {
   .create {
+    padding: 10rem 2rem;
+
+    &__container {
+      display: flex;
+      justify-content: center;
+      gap: clamp(6rem, 5.9vw, 8rem);
+    }
+
+    &__header-tracker-wrapper {
+      width: 35%;
+    }
 
     &__tracker-dropdowns {
-      max-width: 100%;
-      flex-direction: row;
-      flex-wrap: wrap;
+      width: 35%;
+      margin: 0;
+      max-width: none;
+      justify-content: center;
     }
   }
   .create-tracker {
-    max-width: clamp(36rem, 35.2vw, 44rem);
-  }
-
-  .tracker-dropdown {
-    width: 32%;
+    width: 100%;
+    max-width: none;
+    margin: 0;
   }
 }

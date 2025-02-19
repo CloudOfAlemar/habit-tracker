@@ -187,198 +187,201 @@ function Create() {
       <section className="create">
         <div className="create__container">
 
-          {/* Create Header */}
-          <div className="create__header">
-            <h1 className="create__heading">
-              Create <span className="create__heading-alt-color">Tracker</span>
-            </h1>
-          </div>
+          <div className="create__header-tracker-wrapper">
 
-          {/* Create Tracker */}
-          <div className="create-tracker">
-
-            {/* Month Control */}
-            <div className="create-tracker__month-control">
-              <span className="create-tracker__month-label">Select month</span>
-              <div 
-                className="create-tracker__month-dropdown"
-                ref={monthDropdownRef}
-              >
-                <button 
-                  className="create-tracker__month-toggler"
-                  onClick={() => {
-                    handleMonthDropdownToggle();
-                    isYearDropdownOpen && handleYearDropdownToggle();
-                  }}
-                >
-                  {monthTogglerText}
-                  <img 
-                    src={caretIcon} 
-                    alt="Caret arrow." 
-                    className={`create-tracker__month-toggler-caret-icon ${isMonthDropdownOpen && "create-tracker__month-toggler-caret-icon--rotate"}`}
-                  />
-                </button>
-                <p className={`create-tracker__month-toggler-error-msg ${isMonthErrorVisible && "create-tracker__month-toggler-error-msg--show"}`}>
-                  Month required.
-                </p>
-                <ul 
-                  className="create-tracker__month-list"
-                  ref={monthDropdownListRef}
-                  style={{
-                    maxHeight: isMonthDropdownOpen && monthDropdownListRef.current ? `${monthDropdownListRef.current.scrollHeight}px` : "0px",
-                    border: isMonthDropdownOpen ? "1px solid #EFEFEF" : "1px solid transparent"
-                  }}
-                >
-                  <li className="create-tracker__month-item">
-                    <button 
-                      className="create-tracker__month-btn"
-                      tabIndex={isMonthDropdownOpen ? 0 : -1}
-                      onClick={handleMonthBtnClick}
-                      data-monthid={0}
-                    >January</button>
-                  </li>
-                  <li className="create-tracker__month-item">
-                    <button 
-                      className="create-tracker__month-btn"
-                      tabIndex={isMonthDropdownOpen ? 0 : -1}
-                      onClick={handleMonthBtnClick}
-                      data-monthid={1}
-                    >February</button>
-                  </li>
-                  <li className="create-tracker__month-item">
-                    <button 
-                      className="create-tracker__month-btn"
-                      tabIndex={isMonthDropdownOpen ? 0 : -1}
-                      onClick={handleMonthBtnClick}
-                      data-monthid={2}
-                    >March</button>
-                  </li>
-                  <li className="create-tracker__month-item">
-                    <button 
-                      className="create-tracker__month-btn"
-                      tabIndex={isMonthDropdownOpen ? 0 : -1}
-                      onClick={handleMonthBtnClick}
-                      data-monthid={3}
-                    >April</button>
-                  </li>
-                  <li className="create-tracker__month-item">
-                    <button 
-                      className="create-tracker__month-btn"
-                      tabIndex={isMonthDropdownOpen ? 0 : -1}
-                      onClick={handleMonthBtnClick}
-                      data-monthid={4}
-                    >May</button>
-                  </li>
-                  <li className="create-tracker__month-item">
-                    <button 
-                      className="create-tracker__month-btn"
-                      tabIndex={isMonthDropdownOpen ? 0 : -1}
-                      onClick={handleMonthBtnClick}
-                      data-monthid={5}
-                    >June</button>
-                  </li>
-                  <li className="create-tracker__month-item">
-                    <button 
-                      className="create-tracker__month-btn"
-                      tabIndex={isMonthDropdownOpen ? 0 : -1}
-                      onClick={handleMonthBtnClick}
-                      data-monthid={6}
-                    >July</button>
-                  </li>
-                  <li className="create-tracker__month-item">
-                    <button 
-                      className="create-tracker__month-btn"
-                      tabIndex={isMonthDropdownOpen ? 0 : -1}
-                      onClick={handleMonthBtnClick}
-                      data-monthid={7}
-                    >August</button>
-                  </li>
-                  <li className="create-tracker__month-item">
-                    <button 
-                      className="create-tracker__month-btn"
-                      tabIndex={isMonthDropdownOpen ? 0 : -1}
-                      onClick={handleMonthBtnClick}
-                      data-monthid={8}
-                    >September</button>
-                  </li>
-                  <li className="create-tracker__month-item">
-                    <button 
-                      className="create-tracker__month-btn"
-                      tabIndex={isMonthDropdownOpen ? 0 : -1}
-                      onClick={handleMonthBtnClick}
-                      data-monthid={9}
-                    >October</button>
-                  </li>
-                  <li className="create-tracker__month-item">
-                    <button 
-                      className="create-tracker__month-btn"
-                      tabIndex={isMonthDropdownOpen ? 0 : -1}
-                      onClick={handleMonthBtnClick}
-                      data-monthid={10}
-                    >November</button>
-                  </li>
-                  <li className="create-tracker__month-item">
-                    <button 
-                      className="create-tracker__month-btn"
-                      tabIndex={isMonthDropdownOpen ? 0 : -1}
-                      onClick={handleMonthBtnClick}
-                      data-monthid={11}
-                    >December</button>
-                  </li>
-                </ul>
-              </div>
+            {/* Create Header */}
+            <div className="create__header">
+              <h1 className="create__heading">
+                Create <span className="create__heading-alt-color">Tracker</span>
+              </h1>
             </div>
 
-            {/* Year Control */}
-            <div className="create-tracker__year-control">
-              <span className="create-tracker__year-label">Select year</span>
-              <div 
-                className="create-tracker__year-dropdown"
-                ref={yearDropdownRef}
-              >
-                <button 
-                  className="create-tracker__year-toggler" 
-                  onClick={() => {
-                    handleYearDropdownToggle();
-                    isMonthDropdownOpen && handleMonthDropdownToggle();
-                  }}
+            {/* Create Tracker */}
+            <div className="create-tracker">
+
+              {/* Month Control */}
+              <div className="create-tracker__month-control">
+                <span className="create-tracker__month-label">Select month</span>
+                <div 
+                  className="create-tracker__month-dropdown"
+                  ref={monthDropdownRef}
                 >
-                  {yearTogglerText}
-                  <img 
-                    src={caretIcon} 
-                    alt="Caret arrow." 
-                    className={`create-tracker__year-toggler-caret-icon ${isYearDropdownOpen && "create-tracker__year-toggler-caret-icon--rotate"}`} 
-                  />
-                </button>
-                <p className={`create-tracker__year-toggler-error-msg ${isYearErrorVisible && "create-tracker__year-toggler-error-msg--show"}`}>
-                  Year required.
-                </p>
-                <ul 
-                  className="create-tracker__year-list"
-                  ref={yearDropdownListRef}
-                  style={{
-                    maxHeight: isYearDropdownOpen && yearDropdownListRef ? `${yearDropdownListRef.current.scrollHeight}px` : "0px",
-                    border: isYearDropdownOpen ? "1px solid #EFEFEF" : "1px solid transparent"
-                  }}
-                >
-                  {yearOptionsList.map((year, index) => (
-                    <li className="create-tracker__year-item" key={index}>
+                  <button 
+                    className="create-tracker__month-toggler"
+                    onClick={() => {
+                      handleMonthDropdownToggle();
+                      isYearDropdownOpen && handleYearDropdownToggle();
+                    }}
+                  >
+                    {monthTogglerText}
+                    <img 
+                      src={caretIcon} 
+                      alt="Caret arrow." 
+                      className={`create-tracker__month-toggler-caret-icon ${isMonthDropdownOpen && "create-tracker__month-toggler-caret-icon--rotate"}`}
+                    />
+                  </button>
+                  <p className={`create-tracker__month-toggler-error-msg ${isMonthErrorVisible && "create-tracker__month-toggler-error-msg--show"}`}>
+                    Month required.
+                  </p>
+                  <ul 
+                    className="create-tracker__month-list"
+                    ref={monthDropdownListRef}
+                    style={{
+                      maxHeight: isMonthDropdownOpen && monthDropdownListRef.current ? `${monthDropdownListRef.current.scrollHeight}px` : "0px",
+                      border: isMonthDropdownOpen ? "1px solid #EFEFEF" : "1px solid transparent"
+                    }}
+                  >
+                    <li className="create-tracker__month-item">
                       <button 
-                        className="create-tracker__year-btn"
-                        tabIndex={isYearDropdownOpen ? 0 : -1}
-                        onClick={handleYearBtnClick}
-                      >{year}</button>
+                        className="create-tracker__month-btn"
+                        tabIndex={isMonthDropdownOpen ? 0 : -1}
+                        onClick={handleMonthBtnClick}
+                        data-monthid={0}
+                      >January</button>
                     </li>
-                  ))}
-                </ul>
+                    <li className="create-tracker__month-item">
+                      <button 
+                        className="create-tracker__month-btn"
+                        tabIndex={isMonthDropdownOpen ? 0 : -1}
+                        onClick={handleMonthBtnClick}
+                        data-monthid={1}
+                      >February</button>
+                    </li>
+                    <li className="create-tracker__month-item">
+                      <button 
+                        className="create-tracker__month-btn"
+                        tabIndex={isMonthDropdownOpen ? 0 : -1}
+                        onClick={handleMonthBtnClick}
+                        data-monthid={2}
+                      >March</button>
+                    </li>
+                    <li className="create-tracker__month-item">
+                      <button 
+                        className="create-tracker__month-btn"
+                        tabIndex={isMonthDropdownOpen ? 0 : -1}
+                        onClick={handleMonthBtnClick}
+                        data-monthid={3}
+                      >April</button>
+                    </li>
+                    <li className="create-tracker__month-item">
+                      <button 
+                        className="create-tracker__month-btn"
+                        tabIndex={isMonthDropdownOpen ? 0 : -1}
+                        onClick={handleMonthBtnClick}
+                        data-monthid={4}
+                      >May</button>
+                    </li>
+                    <li className="create-tracker__month-item">
+                      <button 
+                        className="create-tracker__month-btn"
+                        tabIndex={isMonthDropdownOpen ? 0 : -1}
+                        onClick={handleMonthBtnClick}
+                        data-monthid={5}
+                      >June</button>
+                    </li>
+                    <li className="create-tracker__month-item">
+                      <button 
+                        className="create-tracker__month-btn"
+                        tabIndex={isMonthDropdownOpen ? 0 : -1}
+                        onClick={handleMonthBtnClick}
+                        data-monthid={6}
+                      >July</button>
+                    </li>
+                    <li className="create-tracker__month-item">
+                      <button 
+                        className="create-tracker__month-btn"
+                        tabIndex={isMonthDropdownOpen ? 0 : -1}
+                        onClick={handleMonthBtnClick}
+                        data-monthid={7}
+                      >August</button>
+                    </li>
+                    <li className="create-tracker__month-item">
+                      <button 
+                        className="create-tracker__month-btn"
+                        tabIndex={isMonthDropdownOpen ? 0 : -1}
+                        onClick={handleMonthBtnClick}
+                        data-monthid={8}
+                      >September</button>
+                    </li>
+                    <li className="create-tracker__month-item">
+                      <button 
+                        className="create-tracker__month-btn"
+                        tabIndex={isMonthDropdownOpen ? 0 : -1}
+                        onClick={handleMonthBtnClick}
+                        data-monthid={9}
+                      >October</button>
+                    </li>
+                    <li className="create-tracker__month-item">
+                      <button 
+                        className="create-tracker__month-btn"
+                        tabIndex={isMonthDropdownOpen ? 0 : -1}
+                        onClick={handleMonthBtnClick}
+                        data-monthid={10}
+                      >November</button>
+                    </li>
+                    <li className="create-tracker__month-item">
+                      <button 
+                        className="create-tracker__month-btn"
+                        tabIndex={isMonthDropdownOpen ? 0 : -1}
+                        onClick={handleMonthBtnClick}
+                        data-monthid={11}
+                      >December</button>
+                    </li>
+                  </ul>
+                </div>
               </div>
-            </div>
 
-            {/* Create Button */}
-            <button
-              className="create-tracker__create-btn"
-              onClick={handleCreateTracker}
-            >Create</button>
+              {/* Year Control */}
+              <div className="create-tracker__year-control">
+                <span className="create-tracker__year-label">Select year</span>
+                <div 
+                  className="create-tracker__year-dropdown"
+                  ref={yearDropdownRef}
+                >
+                  <button 
+                    className="create-tracker__year-toggler" 
+                    onClick={() => {
+                      handleYearDropdownToggle();
+                      isMonthDropdownOpen && handleMonthDropdownToggle();
+                    }}
+                  >
+                    {yearTogglerText}
+                    <img 
+                      src={caretIcon} 
+                      alt="Caret arrow." 
+                      className={`create-tracker__year-toggler-caret-icon ${isYearDropdownOpen && "create-tracker__year-toggler-caret-icon--rotate"}`} 
+                    />
+                  </button>
+                  <p className={`create-tracker__year-toggler-error-msg ${isYearErrorVisible && "create-tracker__year-toggler-error-msg--show"}`}>
+                    Year required.
+                  </p>
+                  <ul 
+                    className="create-tracker__year-list"
+                    ref={yearDropdownListRef}
+                    style={{
+                      maxHeight: isYearDropdownOpen && yearDropdownListRef ? `${yearDropdownListRef.current.scrollHeight}px` : "0px",
+                      border: isYearDropdownOpen ? "1px solid #EFEFEF" : "1px solid transparent"
+                    }}
+                  >
+                    {yearOptionsList.map((year, index) => (
+                      <li className="create-tracker__year-item" key={index}>
+                        <button 
+                          className="create-tracker__year-btn"
+                          tabIndex={isYearDropdownOpen ? 0 : -1}
+                          onClick={handleYearBtnClick}
+                        >{year}</button>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              </div>
+
+              {/* Create Button */}
+              <button
+                className="create-tracker__create-btn"
+                onClick={handleCreateTracker}
+              >Create</button>
+            </div>
           </div>
 
           {/* Tracker Dropdowns */}
