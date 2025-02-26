@@ -1,4 +1,7 @@
 
+
+import { Link, useLocation } from 'react-router-dom';
+import { useState, useRef, useEffect, useMemo } from 'react';
 import './View.scss';
 
 import caretIcon from '../../assets/caret-icon.svg';
@@ -6,10 +9,108 @@ import editIcon from '../../assets/edit-icon.svg';
 import trashIcon from '../../assets/trash-icon.svg';
 
 function View() {
+
+  // React Hook - useLocation(): provides an object that contains information
+  // about the current URL.
+  const location = useLocation();
+
+  // Javascript Web API - URLSearchParams(URL): provides methods to manipulate
+  // URL parameters.
+  const queryParams = new URLSearchParams(location.search);
+
+  // React Hook - useRef: stores a reference of a DOM element to manipulate it
+  // directly or stores a mutable value that doesn't trigger a re-render.
+  const dropdownRef = useRef(null);
+  const dropdownListRef = useRef(null);
+  const newHabitInputRef = useRef(null);
+
+  // React Hook - useMemo: used to recompute a value with a heavy calculation
+  // only when the dependency changes and NOT on every render.
+  const data = useMemo(() => {
+    const year = queryParams.get("year");
+    const month = queryParams.get("month");
+    const monthid = queryParams.get("monthid");
+    const daysInMonth = new Date(year, parseInt(monthid) + 1, 0).getDate();
+    const dates = [];
+    for(let i = 1; i <= daysInMonth; i++) {
+      dates.push(new Date(year, monthid, i));
+    }
+    return {
+      year,
+      month,
+      monthid,
+      dates
+    }
+  });
+
+  // React Hook - useState: changes to state variables trigger UI re-renders
+  // to reflect the updated data.
+  const [trackersList, setTrackersList] = useState(() => {
+    const trackersListStorage = localStorage.getItem("trackersList");
+    return trackersListStorage ? JSON.parse(trackersListStorage) : [];
+  });
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const [isNewHabitModalOpen, setIsNewHabitModalOpen] = useState(false);
+
+  const getCurrentTrackerHabits = () => {
+    return trackersList.find(tracker => tracker.year === data.year)
+      ?.months.find(month => month.name === data.month)?.habits || [];
+  }
+
+  const getSingleChartRowsCount = () => {
+    const completeRows = Math.floor(data.dates.length / 7);
+    const incompleteRows = data.dates.length % 7;
+    return incompleteRows ? completeRows + 1 : completeRows;
+  }
+
+  const deleteHabit = (habitToDelete) => {
+    setTrackersList(previousState => 
+      previousState.map(tracker => 
+        tracker.year === data.year ?
+        {
+          ...tracker,
+          months: tracker.months.map(month =>
+            month.name === data.month ?
+            {
+              ...month,
+              habits: month.habits.filter(habit => habit !== habitToDelete)
+            } :
+            month
+          )
+        } :
+        tracker
+      )
+    )
+  }
+
+  // React Hook - useEffect: runs code when a dependency variable changes.
+  useEffect(() => {
+    console.log( trackersList )
+    localStorage.setItem("trackersList", JSON.stringify(trackersList));
+  }, [trackersList]);
+
+  useEffect(() => {
+    if(!isNewHabitModalOpen) {
+      newHabitInputRef.current.value = "";
+    }
+  }, [isNewHabitModalOpen]);
+
+  useEffect(() => {
+    const handleClickOutsideDropdown = (event) => {
+      if(isDropdownOpen && dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+        setIsDropdownOpen(previousState => !previousState);
+      }
+    }
+
+    document.addEventListener("mousedown", handleClickOutsideDropdown);
+
+    return () => document.removeEventListener("mousedown", handleClickOutsideDropdown);
+  }, [isDropdownOpen]);
+
   return (
     <main className="main">
       <section className="view">
-        <div className="view_container">
+        <div className="view__container">
 
           {/* View Header */}
           <div className="view__header">
@@ -22,28 +123,43 @@ function View() {
           <div className="view__all">
 
             {/* View Dropdown */}
-            <div className="view-dropdown">
-              <button className="view-dropdown__toggler">
-                January (2025)
-                <img src={caretIcon} alt="Caret icon." className="view-dropdown__toggler-caret-icon" />
+            <div 
+              className="view-dropdown"
+              ref={dropdownRef}
+            >
+              <button 
+                className="view-dropdown__toggler"
+                onClick={() => {
+                  setIsDropdownOpen(previousState => !previousState);
+                }}   
+              >
+                {`${data.month} (${data.year})`}
+                <img 
+                  src={caretIcon} alt="Caret icon." 
+                  className={`view-dropdown__toggler-caret-icon ${isDropdownOpen ? "view-dropdown__toggler-caret-icon--rotate" : ""}`} 
+                />
               </button>
 
-              <ul className="view-dropdown__list">
-                <li className="view-dropdown__item">
-                  <button className="view-dropdown__option">February 2025</button>
-                </li>
-                <li className="view-dropdown__item">
-                  <button className="view-dropdown__option">March 2025</button>
-                </li>
-                <li className="view-dropdown__item">
-                  <button className="view-dropdown__option">August 2026</button>
-                </li>
-                <li className="view-dropdown__item">
-                  <button className="view-dropdown__option">September 2026</button>
-                </li>
-                <li className="view-dropdown__item">
-                  <button className="view-dropdown__option">October 2026</button>
-                </li>
+              <ul 
+                className="view-dropdown__list"
+                ref={dropdownListRef}
+                style={{
+                  maxHeight: isDropdownOpen && dropdownListRef.current ? `${dropdownListRef.current.scrollHeight}px`: "0px",
+                  border: isDropdownOpen ? "1px solid #EFEFEF" : "1px solid transparent"
+                }}
+              >
+                {trackersList.flatMap(tracker =>
+                  tracker.months.map(({name, id}) => (
+                    <li className="view-dropdown__item" key={`${tracker.year}-${id}`}>
+                      <Link 
+                        to={`/view?year=${tracker.year}&month=${name}&monthid=${id}`} 
+                        className="view-dropdown__option"
+                        onClick={() => setIsDropdownOpen(previousState => !previousState)}  
+                      >{`${name} ${tracker.year}`}
+                      </Link>
+                    </li>
+                  ))
+                )}
               </ul>
             </div>
 
@@ -55,14 +171,21 @@ function View() {
 
                 {/* Habit Side Header */}
                 <div className="full-chart__habit-side-header">
-                  <button className="full-chart__add-habit-btn">+ Habit</button>
+                  <button 
+                    className="full-chart__add-habit-btn"
+                    onClick={() => {
+                      setIsNewHabitModalOpen(previousState => !previousState);
+                    }}
+                  >+ Habit</button>
                 </div>
 
                 {/* Habit Side Body */}
                 <div className="full-chart__habit-side-body">
-                  <p className="full-chart__habit-title">Build Projects</p>
-                  <p className="full-chart__habit-title">Learn New Technology</p>
-                  <p className="full-chart__habit-title">Workout</p>
+
+                  {getCurrentTrackerHabits().map((habit, index) => (
+                    <p className="full-chart__habit-title" key={index}>{habit}</p>
+                  ))}
+                  
                 </div>
               </div>
 
@@ -71,120 +194,36 @@ function View() {
 
                 {/* Tracking Side Header */}
                 <div className="full-chart__tracking-side-header">
-
-                  {/* Pill #1 */}
-                  <div className="full-chart__pill">
-                    <button className="full-chart__journal-btn">
-                      <img src={editIcon} alt="Edit icon." className="full-chart__edit-icon" />
-                    </button>
-                    <div className="full-chart__short-date">
-                      <span className="full-chart__short-date-letter">S</span>
-                      <span className="full-chart__short-date-number">1</span>
-                    </div>
-                  </div>
-
-                  {/* Pill #2 */}
-                  <div className="full-chart__pill">
-                    <button className="full-chart__journal-btn">
-                      <img src={editIcon} alt="Edit icon." className="full-chart__edit-icon" />
-                    </button>
-                    <div className="full-chart__short-date">
-                      <span className="full-chart__short-date-letter">S</span>
-                      <span className="full-chart__short-date-number">1</span>
-                    </div>
-                  </div>
-
-                  {/* Pill #3 */}
-                  <div className="full-chart__pill">
-                    <button className="full-chart__journal-btn">
-                      <img src={editIcon} alt="Edit icon." className="full-chart__edit-icon" />
-                    </button>
-                    <div className="full-chart__short-date">
-                      <span className="full-chart__short-date-letter">S</span>
-                      <span className="full-chart__short-date-number">1</span>
-                    </div>
-                  </div>
-
-                  {/* Pill #4 */}
-                  <div className="full-chart__pill">
-                    <button className="full-chart__journal-btn">
-                      <img src={editIcon} alt="Edit icon." className="full-chart__edit-icon" />
-                    </button>
-                    <div className="full-chart__short-date">
-                      <span className="full-chart__short-date-letter">S</span>
-                      <span className="full-chart__short-date-number">1</span>
-                    </div>
-                  </div>
-
-                  {/* Pill #5 */}
-                  <div className="full-chart__pill">
-                    <button className="full-chart__journal-btn">
-                      <img src={editIcon} alt="Edit icon." className="full-chart__edit-icon" />
-                    </button>
-                    <div className="full-chart__short-date">
-                      <span className="full-chart__short-date-letter">S</span>
-                      <span className="full-chart__short-date-number">1</span>
-                    </div>
-                  </div>
-
-                  {/* Pill #6 */}
-                  <div className="full-chart__pill">
-                    <button className="full-chart__journal-btn">
-                      <img src={editIcon} alt="Edit icon." className="full-chart__edit-icon" />
-                    </button>
-                    <div className="full-chart__short-date">
-                      <span className="full-chart__short-date-letter">S</span>
-                      <span className="full-chart__short-date-number">1</span>
-                    </div>
-                  </div>
-
-                  {/* Pill #7 */}
-                  <div className="full-chart__pill">
-                    <button className="full-chart__journal-btn">
-                      <img src={editIcon} alt="Edit icon." className="full-chart__edit-icon" />
-                    </button>
-                    <div className="full-chart__short-date">
-                      <span className="full-chart__short-date-letter">S</span>
-                      <span className="full-chart__short-date-number">1</span>
-                    </div>
-                  </div>
+                  
+                  {data.dates.map((date, index) => {
+                    const dayNumeric = date.toLocaleDateString("en-US", {day: "numeric"});
+                    const dayNarrow = date.toLocaleDateString("en-US", {weekday: "narrow"});
+                   
+                    return (
+                      <div className="full-chart__pill" key={index}>
+                        <button className="full-chart__journal-btn">
+                          <img src={editIcon} alt="Edit icon." className="full-chart__edit-icon" />
+                        </button>
+                        <div className="full-chart__short-date">
+                          <span className="full-chart__short-date-letter">{dayNarrow}</span>
+                          <span className="full-chart__short-date-number">{dayNumeric}</span>
+                        </div>
+                      </div> 
+                    )
+                  })}
                 </div>
 
                 {/* Tracking Side Body */}
                 <div className="full-chart__tracking-side-body">
 
-                  {/* Bullet Row #1 */}
-                  <div className="full-chart__bullet-row">
-                    <span className="full-chart__bullet"></span>
-                    <span className="full-chart__bullet"></span>
-                    <span className="full-chart__bullet"></span>
-                    <span className="full-chart__bullet"></span>
-                    <span className="full-chart__bullet"></span>
-                    <span className="full-chart__bullet"></span>
-                    <span className="full-chart__bullet"></span>
-                  </div>
+                  {getCurrentTrackerHabits().map((habit, index) => (
+                    <div className="full-chart__bullet-row" key={index}>
+                      {data.dates.map((date, index) => (
+                        <span className="full-chart__bullet" key={index}></span>
+                      ))}
+                    </div> 
+                  ))}
 
-                  {/* Bullet Row #1 */}
-                  <div className="full-chart__bullet-row">
-                    <span className="full-chart__bullet"></span>
-                    <span className="full-chart__bullet"></span>
-                    <span className="full-chart__bullet"></span>
-                    <span className="full-chart__bullet"></span>
-                    <span className="full-chart__bullet"></span>
-                    <span className="full-chart__bullet"></span>
-                    <span className="full-chart__bullet"></span>
-                  </div>
-
-                  {/* Bullet Row #1 */}
-                  <div className="full-chart__bullet-row">
-                    <span className="full-chart__bullet"></span>
-                    <span className="full-chart__bullet"></span>
-                    <span className="full-chart__bullet"></span>
-                    <span className="full-chart__bullet"></span>
-                    <span className="full-chart__bullet"></span>
-                    <span className="full-chart__bullet"></span>
-                    <span className="full-chart__bullet"></span>
-                  </div>
                 </div>
 
               </div>
@@ -195,219 +234,53 @@ function View() {
           {/* View Single */}
           <div className="view__single">
 
-            {/* Single Chart #1 */}
-            <div className="single-chart">
+            {getCurrentTrackerHabits().map((habit, index) => (
+              
+              <div className="single-chart" key={index}>
 
-              {/* Single Chart Header */}
-              <div className="single-chart__header">
-                <h2 className="single-chart__heading">
-                  Build Projects
-                </h2>
-                <button className="single-chart__trash-btn">
-                  <img src={trashIcon} alt="Trash icon." className="single-chart__trash-btn-icon" />
-                </button>
-              </div>
-
-              {/* Single Chart Body */}
-              <div className="single-chart__body">
-
-                {/* Bullet Row #1 */}
-                <div className="single-chart__bullet-row">
-                  <span className="single-chart__bullet"></span>
-                  <span className="single-chart__bullet"></span>
-                  <span className="single-chart__bullet"></span>
-                  <span className="single-chart__bullet"></span>
-                  <span className="single-chart__bullet"></span>
-                  <span className="single-chart__bullet"></span>
-                  <span className="single-chart__bullet"></span>
+                {/* Single Chart Header */}
+                <div className="single-chart__header">
+                  <h2 className="single-chart__heading">
+                    {habit}
+                  </h2>
+                  <button 
+                    className="single-chart__trash-btn"
+                    onClick={() => deleteHabit(habit)}
+                  >
+                    <img src={trashIcon} alt="Trash icon." className="single-chart__trash-btn-icon" />
+                  </button>
                 </div>
 
-                {/* Bullet Row #2 */}
-                <div className="single-chart__bullet-row">
-                  <span className="single-chart__bullet"></span>
-                  <span className="single-chart__bullet"></span>
-                  <span className="single-chart__bullet"></span>
-                  <span className="single-chart__bullet"></span>
-                  <span className="single-chart__bullet"></span>
-                  <span className="single-chart__bullet"></span>
-                  <span className="single-chart__bullet"></span>
-                </div>
+                {/* Single Chart Body */}
+                <div className="single-chart__body">
 
-                {/* Bullet Row #3 */}
-                <div className="single-chart__bullet-row">
-                  <span className="single-chart__bullet"></span>
-                  <span className="single-chart__bullet"></span>
-                  <span className="single-chart__bullet"></span>
-                  <span className="single-chart__bullet"></span>
-                  <span className="single-chart__bullet"></span>
-                  <span className="single-chart__bullet"></span>
-                  <span className="single-chart__bullet"></span>
-                </div>
+                  {[...Array(getSingleChartRowsCount())].map((_,index) => {
+                    const totalDays = data.dates.length;
+                    const isLastRow = index === getSingleChartRowsCount() -1;
+                    const remainingBullets = totalDays % 7;
+                    const bulletCount = isLastRow && remainingBullets !== 0  ? remainingBullets : 7;
+                    return (
+                      <div className="single-chart__bullet-row" key={index}>
+                        {[...Array(bulletCount)].map((_, index) => (
+                          <span className="single-chart__bullet" key={index}></span>
+                        ))}
+                      </div>
+                    )
+                  })}
 
-                {/* Bullet Row #4 */}
-                <div className="single-chart__bullet-row">
-                  <span className="single-chart__bullet"></span>
-                  <span className="single-chart__bullet"></span>
-                  <span className="single-chart__bullet"></span>
-                  <span className="single-chart__bullet"></span>
-                  <span className="single-chart__bullet"></span>
-                  <span className="single-chart__bullet"></span>
-                  <span className="single-chart__bullet"></span>
-                </div>
-
-                {/* Bullet Row #5 */}
-                <div className="single-chart__bullet-row">
-                  <span className="single-chart__bullet"></span>
-                  <span className="single-chart__bullet"></span>
-                  <span className="single-chart__bullet"></span>
                 </div>
               </div>
-            </div>
+            ))}
 
-            {/* Single Chart #2 */}
-            <div className="single-chart">
-
-              {/* Single Chart Header */}
-              <div className="single-chart__header">
-                <h2 className="single-chart__heading">
-                  Learn New Technologies
-                </h2>
-                <button className="btn-trash single-chart__trash-btn">
-                  <img src={trashIcon} alt="Trash icon." className="single-chart__trash-btn-icon" />
-                </button>
-              </div>
-
-              {/* Single Chart Body */}
-              <div className="single-chart__body">
-
-                {/* Bullet Row #1 */}
-                <div className="single-chart__bullet-row">
-                  <span className="single-chart__bullet"></span>
-                  <span className="single-chart__bullet"></span>
-                  <span className="single-chart__bullet"></span>
-                  <span className="single-chart__bullet"></span>
-                  <span className="single-chart__bullet"></span>
-                  <span className="single-chart__bullet"></span>
-                  <span className="single-chart__bullet"></span>
-                </div>
-
-                {/* Bullet Row #2 */}
-                <div className="single-chart__bullet-row">
-                  <span className="single-chart__bullet"></span>
-                  <span className="single-chart__bullet"></span>
-                  <span className="single-chart__bullet"></span>
-                  <span className="single-chart__bullet"></span>
-                  <span className="single-chart__bullet"></span>
-                  <span className="single-chart__bullet"></span>
-                  <span className="single-chart__bullet"></span>
-                </div>
-
-                {/* Bullet Row #3 */}
-                <div className="single-chart__bullet-row">
-                  <span className="single-chart__bullet"></span>
-                  <span className="single-chart__bullet"></span>
-                  <span className="single-chart__bullet"></span>
-                  <span className="single-chart__bullet"></span>
-                  <span className="single-chart__bullet"></span>
-                  <span className="single-chart__bullet"></span>
-                  <span className="single-chart__bullet"></span>
-                </div>
-
-                {/* Bullet Row #4 */}
-                <div className="single-chart__bullet-row">
-                  <span className="single-chart__bullet"></span>
-                  <span className="single-chart__bullet"></span>
-                  <span className="single-chart__bullet"></span>
-                  <span className="single-chart__bullet"></span>
-                  <span className="single-chart__bullet"></span>
-                  <span className="single-chart__bullet"></span>
-                  <span className="single-chart__bullet"></span>
-                </div>
-
-                {/* Bullet Row #5 */}
-                <div className="single-chart__bullet-row">
-                  <span className="single-chart__bullet"></span>
-                  <span className="single-chart__bullet"></span>
-                  <span className="single-chart__bullet"></span>
-                </div>
-              </div>
-            </div>
-
-            {/* Single Chart #3 */}
-            <div className="single-chart">
-
-              {/* Single Chart Header */}
-              <div className="single-chart__header">
-                <h2 className="single-chart__heading">
-                  Workout
-                </h2>
-                <button className="btn-trash single-chart__trash-btn">
-                  <img src={trashIcon} alt="Trash icon." className="single-chart__trash-btn-icon" />
-                </button>
-              </div>
-
-              {/* Single Chart Body */}
-              <div className="single-chart__body">
-
-                {/* Bullet Row #1 */}
-                <div className="single-chart__bullet-row">
-                  <span className="single-chart__bullet"></span>
-                  <span className="single-chart__bullet"></span>
-                  <span className="single-chart__bullet"></span>
-                  <span className="single-chart__bullet"></span>
-                  <span className="single-chart__bullet"></span>
-                  <span className="single-chart__bullet"></span>
-                  <span className="single-chart__bullet"></span>
-                </div>
-
-                {/* Bullet Row #2 */}
-                <div className="single-chart__bullet-row">
-                  <span className="single-chart__bullet"></span>
-                  <span className="single-chart__bullet"></span>
-                  <span className="single-chart__bullet"></span>
-                  <span className="single-chart__bullet"></span>
-                  <span className="single-chart__bullet"></span>
-                  <span className="single-chart__bullet"></span>
-                  <span className="single-chart__bullet"></span>
-                </div>
-
-                {/* Bullet Row #3 */}
-                <div className="single-chart__bullet-row">
-                  <span className="single-chart__bullet"></span>
-                  <span className="single-chart__bullet"></span>
-                  <span className="single-chart__bullet"></span>
-                  <span className="single-chart__bullet"></span>
-                  <span className="single-chart__bullet"></span>
-                  <span className="single-chart__bullet"></span>
-                  <span className="single-chart__bullet"></span>
-                </div>
-
-                {/* Bullet Row #4 */}
-                <div className="single-chart__bullet-row">
-                  <span className="single-chart__bullet"></span>
-                  <span className="single-chart__bullet"></span>
-                  <span className="single-chart__bullet"></span>
-                  <span className="single-chart__bullet"></span>
-                  <span className="single-chart__bullet"></span>
-                  <span className="single-chart__bullet"></span>
-                  <span className="single-chart__bullet"></span>
-                </div>
-
-                {/* Bullet Row #5 */}
-                <div className="single-chart__bullet-row">
-                  <span className="single-chart__bullet"></span>
-                  <span className="single-chart__bullet"></span>
-                  <span className="single-chart__bullet"></span>
-                </div>
-              </div>
-            </div>
           </div>
 
         </div>
       </section>
 
       {/* New Habit Modal */}
-      <div className="new-habit-modal">
+      <div 
+        className={`new-habit-modal ${isNewHabitModalOpen ? "new-habit-modal--show" : ""}`}
+      >
         <div className="new-habit-modal__card">
 
           {/* Habit Control */}
@@ -417,13 +290,47 @@ function View() {
               type="text"
               className="new-habit-modal__input"
               placeholder="New Habit"
+              ref={newHabitInputRef}
             />
           </div>
 
           {/* Buttons */}
           <div className="new-habit-modal__btns">
-            <button className="new-habit-modal__add-btn">Add</button>
-            <button className="new-habit-modal__cancel-btn">Cancel</button>
+            <button
+              className="new-habit-modal__add-btn"
+              onClick={() => {
+                if(
+                  newHabitInputRef.current &&
+                  newHabitInputRef.current.value !== ""
+                ) {
+                  // Updates trackersList with new Habit
+                  setTrackersList(previousState => 
+                    previousState.map(tracker => 
+                      tracker.year === data.year ?
+                      {
+                        ...tracker,
+                        months: tracker.months.map(month => 
+                          month.name === data.month ?
+                          {
+                            ...month,
+                            habits: [...(month.habits ?? []), newHabitInputRef.current.value]
+                          } :
+                          month
+                        )
+                      } :
+                      tracker
+                    )
+                  );
+                  setIsNewHabitModalOpen(previousState => !previousState);
+                }
+              }}
+            >Add</button>
+            <button
+              className="new-habit-modal__cancel-btn"
+              onClick={() => {
+                setIsNewHabitModalOpen(previousState => !previousState);
+              }}
+            >Cancel</button>
           </div>
         </div>
       </div>
@@ -647,3 +554,39 @@ function View() {
 }
 
 export default View;
+
+  // Delete this after
+  // const trackersListDemo = [
+  //   {
+  //     year: 2025,
+  //     months: [
+  //       {
+  //         name: "January",
+  //         id: "0",
+  //         habits: [
+  //           "Build Projects",
+  //           "Learn New Technologies",
+  //           "Workout"
+  //         ],
+  //         days: [
+  //           {
+  //             name: "Wednesday",
+  //             id: "1",
+  //             journal: {
+  //               habits: [
+  //                 {
+  //                   title: "Build Projects",
+  //                   status: "green",
+  //                   notes: [
+  //                     "I completed the responsive design today.",
+  //                     "I made progress on the backend."
+  //                   ]
+  //                 }
+  //               ]
+  //             }
+  //           }
+  //         ]
+  //       }
+  //     ]
+  //   }
+  // ]

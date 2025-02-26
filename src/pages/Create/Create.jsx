@@ -6,12 +6,15 @@ import './Create.scss';
 import caretIcon from '../../assets/caret-icon.svg';
 import trashIcon from '../../assets/trash-icon.svg';
 import linkArrowIcon from '../../assets/link-arrow-icon.svg';
+import { Link } from 'react-router-dom';
 
 function Create() {
 
   // State Variables
-  // const [trackersList, setTrackersList] = useState([]);
-  const [trackersList, setTrackersList] = useState(JSON.parse(localStorage.getItem("trackersListStorage")));
+  const [trackersList, setTrackersList] = useState(() => {
+    const trackersListStorage = localStorage.getItem("trackersList");
+    return trackersListStorage ? JSON.parse(trackersListStorage) : [];
+  });
   const [trackerSelect, setTrackerSelect] = useState({});
   const [isMonthDropdownOpen, setIsMonthDropdownOpen] = useState(false);
   const [isYearDropdownOpen, setIsYearDropdownOpen] = useState(false);
@@ -30,7 +33,6 @@ function Create() {
   const monthDropdownListRef = useRef(null);
   const yearDropdownRef = useRef(null);
   const yearDropdownListRef = useRef(null);
-
   const trackerDropdownRefs = useRef({});
 
   // Variables
@@ -44,9 +46,6 @@ function Create() {
   ];
 
   // Functions
-  const handleMonthDropdownToggle = () => setIsMonthDropdownOpen(previousState => !previousState);
-  const handleYearDropdownToggle = () => setIsYearDropdownOpen(previousState => !previousState);
-
   const handleMonthBtnClick = (event) => {
     setTrackerSelect(previousState => ({
       ...previousState,
@@ -57,7 +56,7 @@ function Create() {
     }));
     setMonthTogglerText(event.target.textContent);
     setIsMonthErrorVisible(false);
-    handleMonthDropdownToggle();
+    setIsMonthDropdownOpen(previousState => !previousState);
   }
 
   const handleYearBtnClick = (event) => {
@@ -67,7 +66,7 @@ function Create() {
     }));
     setYearTogglerText(event.target.textContent);
     setIsYearErrorVisible(false);
-    handleYearDropdownToggle();
+    setIsYearDropdownOpen(previousState => !previousState)
   }
 
   const handleCreateTracker = () => {
@@ -82,32 +81,54 @@ function Create() {
       setIsMonthErrorVisible(true);
     } else {
 
-      const yearExists = trackersList.some(obj => obj.year === trackerSelect.year);
+      const getDaysArray = (year, monthId) => {
+        return [...Array(new Date(year, parseInt(monthId) + 1, 0).getDate())].map((_, index) => {
+          const currentDate = new Date(year, parseInt(monthId), index + 1);
+          return {
+            name: currentDate.toLocaleDateString("en-US", {weekday: "long"}),
+            dayOfTheMonth: index + 1,
+            journal: {
+              habitsLog: []
+            }
+          }
+        })
+      }
 
-      const newTrackersListState = trackersList.map(obj => {
-        const yearMatches = obj.year === trackerSelect.year;
-        const containsMonth = obj.months.some(obj => obj.name === trackerSelect.month.name);
-
-        if(yearMatches && !containsMonth) {
-          return {...obj, months: [...obj.months, {name: trackerSelect.month.name, id: trackerSelect.month.id}]};
-        } else {
-          return obj;
-        }
-      });
-
-      if(trackersList.length === 0 || !yearExists) {
-        setTrackersList(previousState => [
+      setTrackersList(previousState =>
+        previousState.some(tracker => tracker.year === trackerSelect.year)
+        ? previousState.map(tracker =>
+          tracker.year === trackerSelect.year
+          ? {
+              ...tracker, 
+              months: tracker.months.some(month => month.name === trackerSelect.month.name)
+              ? [...tracker.months]
+              : [
+                ...tracker.months,
+                {
+                  name: trackerSelect.month.name,
+                  id: trackerSelect.month.id,
+                  habits: [],
+                  days: getDaysArray(trackerSelect.year, trackerSelect.month.id)
+                }
+              ].sort((a,b) => a.id - b.id)
+            }
+          : tracker
+        )
+        : [
           ...previousState,
           {
             year: trackerSelect.year,
-            months: [{name: trackerSelect.month.name, id: trackerSelect.month.id}]
+            months: [
+              {
+                name: trackerSelect.month.name,
+                id: trackerSelect.month.id,
+                habits: [],
+                days: getDaysArray(trackerSelect.year, trackerSelect.month.id)
+              }
+            ]
           }
-        ].sort((a, b) => a.year - b.year));
-      } else {
-        setTrackersList(newTrackersListState.map(obj => {
-          return {...obj, months: [...obj.months.sort((a, b) => a.id - b.id)]};
-        }).sort((a, b) => a.year - b.year));
-      }
+        ].sort((a,b) => a.year - b.year)
+      );
       
       setIsYearErrorVisible(false);
       setIsMonthErrorVisible(false);
@@ -118,9 +139,6 @@ function Create() {
   }
 
   // Use Effects
-  // useEffect(() => {
-  //   console.log( `Tracker List: `, trackersList );
-  // }, [trackersList]);
 
   // useEffect(() => {
   //   console.log( `Tracker Select: `, trackerSelect )
@@ -135,8 +153,9 @@ function Create() {
   // },[trackerDeleteSelected]);
 
   useEffect(() => {
-
-    localStorage.setItem("trackersListStorage", JSON.stringify(trackersList));
+    // console.log( trackersList )
+    
+    trackersList.length !== 0 && localStorage.setItem("trackersList", JSON.stringify(trackersList));
 
     trackersList.forEach(tracker => {
       const year = tracker.year;
@@ -157,7 +176,7 @@ function Create() {
         monthDropdownRef.current &&
         !monthDropdownRef.current.contains(event.target)
       ) {
-        handleMonthDropdownToggle();
+        setIsMonthDropdownOpen(previousState => !previousState);
       }
     }
 
@@ -173,7 +192,7 @@ function Create() {
         yearDropdownRef.current &&
         !yearDropdownRef.current.contains(event.target)
       ) {
-        handleYearDropdownToggle();
+        setIsYearDropdownOpen(previousState => !previousState)
       }
     }
 
@@ -209,8 +228,8 @@ function Create() {
                   <button 
                     className="create-tracker__month-toggler"
                     onClick={() => {
-                      handleMonthDropdownToggle();
-                      isYearDropdownOpen && handleYearDropdownToggle();
+                      setIsMonthDropdownOpen(previousState => !previousState);
+                      isYearDropdownOpen && setIsYearDropdownOpen(previousState => !previousState)
                     }}
                   >
                     {monthTogglerText}
@@ -341,8 +360,8 @@ function Create() {
                   <button 
                     className="create-tracker__year-toggler" 
                     onClick={() => {
-                      handleYearDropdownToggle();
-                      isMonthDropdownOpen && handleMonthDropdownToggle();
+                      setIsYearDropdownOpen(previousState => !previousState)
+                      isMonthDropdownOpen && setIsMonthDropdownOpen(previousState => !previousState);
                     }}
                   >
                     {yearTogglerText}
@@ -429,10 +448,10 @@ function Create() {
                   >
                     {obj.months.map((month, trackerItemIndex) => (
                       <li className="tracker-dropdown__item" key={trackerItemIndex}>
-                        <a href="" className="tracker-dropdown__link">
+                        <Link to={`/view?year=${obj.year}&month=${month.name}&monthid=${month.id}`} className="tracker-dropdown__link">
                           <img src={linkArrowIcon} alt="Link arrow icon." className="tracker-dropdown__link-arrow-icon" />
                           {month.name}
-                        </a>
+                        </Link>
                         <button
                           className="tracker-dropdown__trash-btn"
                           onClick={() => {
@@ -494,45 +513,3 @@ function Create() {
 }
 
 export default Create;
-
-/* 
-
-Tracker Select:
-
-{
-  year: 2024,
-  month: {name: "December", id: 11}
-}
-
-{
-  year: 2024,
-  month: {name: "November", id: 10}
-}
-
-=========================================
-
-Trackers List:
-
-[
-  {
-    year: 2023,
-    months: [
-      {name: "August", id: 7}
-    ]
-  },
-  {
-    year: 2024,
-    months: [
-      {name: "December", id: 11}
-    ]
-  },
-  {
-    year: 2025,
-    months: [
-      {name: "January", id: 0}
-      {name: "February", id: 1}
-    ]
-  },
-]
-
-*/

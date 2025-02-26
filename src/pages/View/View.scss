@@ -4,6 +4,11 @@
 .view {
   padding: 3.2rem 2rem;
 
+  &__container {
+    max-width: 1200px;
+    margin: auto;
+  }
+
   &__header {
     margin-bottom: 3.2rem;
   }
@@ -19,10 +24,9 @@
   }
 
   &__single {
-    display: flex;
-    flex-direction: column;
-    gap: 6rem;
-    overflow: auto;
+    display: grid;
+    gap: 4rem;
+    justify-content: center;
   }
 }
 
@@ -44,25 +48,32 @@
     border: none;
     width: 100%;
     font-weight: 300;
+    cursor: pointer;
 
     &-caret-icon {
       height: 2rem;
+      transition: transform 300ms ease-in-out;
+
+      &--rotate {
+        transform: rotate(-180deg);
+      }
     }
   }
 
   &__list {
-    border: 1px solid vars.$gray-light;
     border-radius: 4px;
     overflow: hidden;
     position: absolute;
     width: 100%;
-
     max-height: 0px;
     overflow: hidden;
-    border: none;
+    transition: 
+      max-height 300ms ease-in-out,
+      border 300ms ease-in-out;
   }
 
   &__option {
+    display: block;
     width: 100%;
     background-color: vars.$white-off;
     color: vars.$purple-gray;
@@ -70,6 +81,7 @@
     padding: .6em 1em;
     font-size: 2rem;
     text-align: left;
+    cursor: pointer;
   }
 }
 
@@ -145,6 +157,7 @@
     border: none;
     border-radius: 4px;
     margin-bottom: 1.2rem;
+    cursor: pointer;
   }
 
   &__edit-icon {
@@ -186,7 +199,6 @@
   background-color: vars.$white-off;
   border-radius: 4px;
   width: 33.5rem;
-  margin: auto;
 
   &__header {
     display: flex;
@@ -240,6 +252,7 @@
   top: 0;
   left: 0;
   width: 100%;
+  z-index: 100;
   min-height: 100vh;
   background-color: rgba(0, 0, 0, 0.5);
   display: flex;
@@ -308,6 +321,10 @@
 
   &__cancel-btn {
     background-color: vars.$purple-gray-light;
+  }
+
+  &--show {
+    display: flex;
   }
 }
 
@@ -611,5 +628,25 @@
 
   &__cancel-btn {
     background-color: vars.$purple-gray-light;
+  }
+}
+
+@media screen and (min-width: 1024px) {
+  .view {
+
+    &__single {
+      grid-template-columns: repeat(2, 1fr);
+      width: fit-content;
+      margin: auto;
+    }
+  }
+}
+
+@media screen and (min-width: 1200px) {
+  .view {
+
+    &__single {
+      grid-template-columns: repeat(3, 1fr);
+    }
   }
 }
