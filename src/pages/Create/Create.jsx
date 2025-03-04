@@ -85,6 +85,7 @@ function Create() {
         return [...Array(new Date(year, parseInt(monthId) + 1, 0).getDate())].map((_, index) => {
           const currentDate = new Date(year, parseInt(monthId), index + 1);
           return {
+            date: currentDate,
             name: currentDate.toLocaleDateString("en-US", {weekday: "long"}),
             dayOfTheMonth: index + 1,
             journal: {

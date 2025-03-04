@@ -332,6 +332,7 @@
   position: fixed;
   top: 0;
   left: 0;
+  z-index: 100;
   width: 100%;
   min-height: 100vh;
   background-color: rgba(0, 0, 0, 0.5);
@@ -340,6 +341,20 @@
   align-items: center;
   display: none;
 
+  &__btn,
+  &__close-btn {
+    width: 100%;
+    display: block;
+    font-size: 2rem;
+    font-weight: 500;
+    padding: .6em 1em;
+    color: vars.$white-off;
+    text-align: center;
+    border: none;
+    border-radius: .4rem;
+    cursor: pointer;
+  }
+
   &__card {
     background-color: #FFFFFF;
     padding: 2rem;
@@ -347,7 +362,7 @@
     border-radius: .4rem;
     width: 90%;
     max-width: 40rem;
-    max-height: clamp(24rem, 85.7vh, 60rem);
+    max-height: clamp(24rem, 85.7vh, 65rem);
     overflow: auto;
   }
 
@@ -367,21 +382,21 @@
   }
 
   &__btn {
-    width: 100%;
     background-color: vars.$purple-dark;
-    display: block;
-    font-size: 2rem;
-    font-weight: 500;
-    padding: .6em 1em;
-    color: vars.$white-off;
-    text-align: center;
-    border: none;
-    border-radius: .4rem;
-    cursor: pointer;
+    margin-bottom: 2rem;
+  }
+
+  &__close-btn {
+    background-color: vars.$pink;
+  }
+
+  &--show {
+    display: flex;
   }
 }
 
 .journal-modal-habit {
+  margin-bottom: 3rem;
 
   &__header {
     margin-bottom: .8rem;
@@ -419,17 +434,37 @@
   }
 }
 
+.journal-modal-habit:last-child {
+  margin-bottom: 0;
+}
+
 .edit-journal-modal {
   position: fixed;
   top: 0;
   left: 0;
   width: 100%;
+  z-index: 100;
   min-height: 100vh;
   background-color: rgba(0, 0, 0, 0.5);
   display: flex;
   justify-content: center;
   align-items: center;
   display: none;
+
+  // Combined Styles
+  &__save-btn,
+  &__cancel-btn {
+    width: 100%;
+    display: block;
+    font-size: 2rem;
+    font-weight: 500;
+    padding: .6em 1em;
+    color: vars.$white-off;
+    text-align: center;
+    border: none;
+    border-radius: .4rem;
+    cursor: pointer;
+  }
 
   // Individual Styles
   &__card {
@@ -439,7 +474,7 @@
     border-radius: .4rem;
     width: 90%;
     max-width: 40rem;
-    max-height: clamp(24rem, 85.7vh, 60rem);
+    max-height: clamp(24rem, 85.7vh, 65rem);
     overflow: auto;
   }
 
@@ -462,17 +497,16 @@
   }
 
   &__save-btn {
-    width: 100%;
     background-color: vars.$purple-dark;
-    display: block;
-    font-size: 2rem;
-    font-weight: 500;
-    padding: .6em 1em;
-    color: vars.$white-off;
-    text-align: center;
-    border: none;
-    border-radius: .4rem;
-    cursor: pointer;
+    margin-bottom: 2rem;
+  }
+
+  &__cancel-btn {
+    background-color: vars.$pink;
+  }
+
+  &--show {
+    display: flex;
   }
 }
 
@@ -495,6 +529,16 @@
     display: inline-block;
     border-radius: 4px;
     flex: 0 0 auto;
+    cursor: pointer;
+    &--green {
+      background-color: vars.$green;
+    }
+    &--yellow {
+      background-color: vars.$yellow;
+    }
+    &--red {
+      background-color: vars.$pink-light;
+    }
   }
 
   &__tips {
@@ -524,6 +568,8 @@
     display: flex;
     align-items: flex-start;
     gap: 1.2rem;
+    justify-content: space-between;
+    align-items: center;
   }
 
   &__note {
@@ -576,6 +622,7 @@
   top: 0;
   left: 0;
   width: 100%;
+  z-index: 100;
   min-height: 100vh;
   background-color: rgba(0, 0, 0, 0.5);
   display: flex;
@@ -628,6 +675,9 @@
 
   &__cancel-btn {
     background-color: vars.$purple-gray-light;
+  }
+  &--show {
+    display: flex;
   }
 }
 
