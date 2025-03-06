@@ -7,6 +7,7 @@ import './View.scss';
 import caretIcon from '../../assets/caret-icon.svg';
 import editIcon from '../../assets/edit-icon.svg';
 import trashIcon from '../../assets/trash-icon.svg';
+import birdImg from '../../assets/bird.svg';
 
 function View() {
 
@@ -329,48 +330,89 @@ function View() {
           {/* View Single */}
           <div className="view__single">
 
-            {data.currentHabits().map((habit, index) => (
+            {data.currentHabits().map((habit, index) => {
+              let count = 0;
+              return (
               
-              <div className="single-chart" key={index}>
+                <div className="single-chart" key={index}>
+  
+                  {/* Single Chart Header */}
+                  <div className="single-chart__header">
+                    <h2 className="single-chart__heading">
+                      {habit}
+                    </h2>
+                    <button 
+                      className="single-chart__trash-btn"
+                      onClick={() => {
+                        setHabitToDelete(habit);
+                        setIsDeleteHabitModalOpen(previousState => !previousState);
+                      }}
+                    >
+                      <img src={trashIcon} alt="Trash icon." className="single-chart__trash-btn-icon" />
+                    </button>
+                  </div>
+  
+                  {/* Single Chart Body */}
+                  <div className="single-chart__body">
+  
+                    {/* Work on displaying status color */}
+  
+                    {[...Array(getSingleChartRowsCount())].map((_,index) => {
+                      const totalDays = data.currentDays().length;
+                      const isLastRow = index === getSingleChartRowsCount() - 1;
+                      const remainingBullets = totalDays % 7;
+                      const bulletCount = isLastRow && remainingBullets !== 0  ? remainingBullets : 7;
+                      return (
+                        <div className="single-chart__bullet-row" key={index}>
+                          {[...Array(bulletCount)].map((_, index) => {
+                            count++;
+                            const bulletStatus = data.currentDays()
+                              .find(day => day.dayOfTheMonth === count).journal.habitsLog
+                              .find(habitLog => habitLog.title === habit).status;
 
-                {/* Single Chart Header */}
-                <div className="single-chart__header">
-                  <h2 className="single-chart__heading">
-                    {habit}
-                  </h2>
-                  <button 
-                    className="single-chart__trash-btn"
-                    onClick={() => {
-                      setHabitToDelete(habit);
-                      setIsDeleteHabitModalOpen(previousState => !previousState);
-                    }}
-                  >
-                    <img src={trashIcon} alt="Trash icon." className="single-chart__trash-btn-icon" />
-                  </button>
+                            return (
+                              <span 
+                                className="single-chart__bullet" 
+                                key={index}
+                                data-day-count={count}
+                                style={{
+                                  backgroundColor: `${
+                                  bulletStatus === "green"
+                                  ? "#C9FFC8"
+                                  : bulletStatus === "yellow"
+                                  ? "#FFFEC8"
+                                  : bulletStatus === "red"
+                                  ? "#FFE3E9"
+                                  : "transparent"
+                                }`
+                                }}
+                              ></span>
+                            )
+                          })}
+                        </div>
+                      )
+                    })}
+  
+                  </div>
                 </div>
-
-                {/* Single Chart Body */}
-                <div className="single-chart__body">
-
-                  {[...Array(getSingleChartRowsCount())].map((_,index) => {
-                    const totalDays = data.currentDays().length;
-                    const isLastRow = index === getSingleChartRowsCount() - 1;
-                    const remainingBullets = totalDays % 7;
-                    const bulletCount = isLastRow && remainingBullets !== 0  ? remainingBullets : 7;
-                    return (
-                      <div className="single-chart__bullet-row" key={index}>
-                        {[...Array(bulletCount)].map((_, index) => (
-                          <span className="single-chart__bullet" key={index}></span>
-                        ))}
-                      </div>
-                    )
-                  })}
-
-                </div>
-              </div>
-            ))}
+              )
+            })}
 
           </div>
+
+          {data.currentHabits().length === 0 && (
+            <div className="missing-single-chart">
+              <div className="missing-single-chart__img-wrapper">
+                <img 
+                  src={birdImg} alt="Image of a bird listening to music in waiting." 
+                  className="missing-single-chart__bird-img" 
+                />
+              </div>
+              <p className="missing-single-chart__missing-text">
+                Waiting for a new habit to be created...
+              </p>
+            </div>
+          )}
 
         </div>
       </section>

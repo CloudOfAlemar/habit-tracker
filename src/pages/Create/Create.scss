@@ -115,6 +115,7 @@
     background-color: vars.$white-off;
     text-align: left;
     color: vars.$purple-gray;
+    cursor: pointer;
   }
 
   // Individual Styles
@@ -204,6 +205,31 @@
       display: block;
       height: 2rem;
     }
+  }
+}
+
+.missing-single-chart {
+
+  &__bird-img,
+  &__missing-text {
+    max-width: 500px;
+    margin: auto;
+  }
+
+  &__img-wrapper {
+    margin-bottom: 3.2rem;
+  }
+
+  &__bird-img {
+    display: block;
+    width: 100%;
+  }
+
+  &__missing-text {
+    color: vars.$purple-gray-light;
+    font-size: 2.4rem;
+    font-weight: 300;
+    text-align: center;
   }
 }
 

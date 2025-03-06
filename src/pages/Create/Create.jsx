@@ -6,6 +6,7 @@ import './Create.scss';
 import caretIcon from '../../assets/caret-icon.svg';
 import trashIcon from '../../assets/trash-icon.svg';
 import linkArrowIcon from '../../assets/link-arrow-icon.svg';
+import birdImg from '../../assets/bird.svg';
 import { Link } from 'react-router-dom';
 
 function Create() {
@@ -157,6 +158,7 @@ function Create() {
     // console.log( trackersList )
     
     trackersList.length !== 0 && localStorage.setItem("trackersList", JSON.stringify(trackersList));
+    trackersList.length === 0 && localStorage.removeItem("trackersList");
 
     trackersList.forEach(tracker => {
       const year = tracker.year;
@@ -405,7 +407,12 @@ function Create() {
           </div>
 
           {/* Tracker Dropdowns */}
-          <div className="create__tracker-dropdowns">
+          <div 
+            className="create__tracker-dropdowns"
+            style={{
+              display: trackersList.length === 0 ? "none" : "flex"
+            }}
+          >
 
             {trackersList.map((obj, trackerDropdownIndex) => {
               if(!trackerDropdownRefs.current[`trackerDropdown${obj.year}`]) {
@@ -471,6 +478,20 @@ function Create() {
 
           </div>
 
+          {trackersList.length === 0 && (
+            <div className="missing-single-chart">
+            <div className="missing-single-chart__img-wrapper">
+              <img 
+                src={birdImg} alt="Image of a bird listening to music in waiting." 
+                className="missing-single-chart__bird-img" 
+              />
+            </div>
+            <p className="missing-single-chart__missing-text">
+              Waiting for a new tracker to be created...
+            </p>
+          </div>
+          )}
+
         </div>
       </section>
 
@@ -486,19 +507,16 @@ function Create() {
             <button
               className="delete-tracker-modal__delete-btn"
               onClick={()=> {
-                const updatedTrackersList = trackersList.map(trackerObj => {
-                  const containsYear = trackerObj.year === trackerDeleteSelected.year;
-                  const containsMonth = trackerObj.months.some(monthObj => monthObj.name === trackerDeleteSelected.month.name);
-                  if(containsYear && containsMonth) {
-                    const updatedMonths = trackerObj.months.filter(month => month.name !== trackerDeleteSelected.month.name);
-                    return {...trackerObj, months: [...updatedMonths]};
-                  } else {
-                    return trackerObj;
-                  }
+                setTrackersList(previousState => {
+                  return previousState.map(tracker => 
+                    tracker.year === trackerDeleteSelected.year
+                    ? {
+                      ...tracker,
+                      months: tracker.months.filter(month => month.name !== trackerDeleteSelected.month.name)
+                    }
+                    : tracker
+                  ).filter(tracker => tracker.months.length !== 0)
                 });
-
-                const filteredTrackersList = updatedTrackersList.filter(obj => obj.months.length !== 0);
-                setTrackersList(filteredTrackersList);
                 setIsDeleteModalOpen(false);
               }}
             >Delete</button>

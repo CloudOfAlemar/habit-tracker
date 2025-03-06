@@ -219,6 +219,7 @@
     border: 1px solid vars.$purple-gray-light;
     padding: 1em;
     border-radius: .4rem;
+    cursor: pointer;
 
     &-icon {
       display: block;
@@ -244,6 +245,31 @@
     display: inline-block;
     border-radius: 4px;
     flex: 0 0 auto;
+  }
+}
+
+.missing-single-chart {
+
+  &__bird-img,
+  &__missing-text {
+    max-width: 500px;
+    margin: auto;
+  }
+
+  &__img-wrapper {
+    margin-bottom: 3.2rem;
+  }
+
+  &__bird-img {
+    display: block;
+    width: 100%;
+  }
+
+  &__missing-text {
+    color: vars.$purple-gray-light;
+    font-size: 2.4rem;
+    font-weight: 300;
+    text-align: center;
   }
 }
 
