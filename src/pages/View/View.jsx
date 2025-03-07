@@ -121,20 +121,6 @@ function View() {
   // React Hook - useEffect: runs code when a dependency variable changes.
 
   useEffect(() => {
-    console.log(currentJournalData);
-    // console.log( trackersList )
-  }, [currentJournalData]);
-
-  useEffect(() => {
-    console.log( currentJournalData )
-    console.log(currentEditJournalData);
-  }, [currentEditJournalData]);
-
-  useEffect(() => {
-    console.log( noteInputRefs.current )
-  }, [currentEditJournalData.habitsLog]);
-
-  useEffect(() => {
     trackersList.length > 0 && localStorage.setItem("trackersList", JSON.stringify(trackersList));
   }, [trackersList]);
 
@@ -182,7 +168,7 @@ function View() {
                   setIsDropdownOpen(previousState => !previousState);
                 }}   
               >
-                {`${data.month} (${data.year})`}
+                {`${data.month || "Month"} (${data.year || "Year"})`}
                 <img 
                   src={caretIcon} alt="Caret icon." 
                   className={`view-dropdown__toggler-caret-icon ${isDropdownOpen ? "view-dropdown__toggler-caret-icon--rotate" : ""}`} 
@@ -213,7 +199,12 @@ function View() {
             </div>
 
             {/* Full Chart */}
-            <div className="full-chart">
+            <div 
+              className="full-chart"
+              style={{
+                display: !data.year ? "none" : "flex"
+              }}
+            >
 
               {/* Habit Side */}
               <div className="full-chart__habit-side">
@@ -400,7 +391,7 @@ function View() {
 
           </div>
 
-          {data.currentHabits().length === 0 && (
+          {(data.currentHabits().length === 0 && data.year) && (
             <div className="missing-single-chart">
               <div className="missing-single-chart__img-wrapper">
                 <img 
