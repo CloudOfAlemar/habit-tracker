@@ -1,6 +1,9 @@
 
 import { Link } from 'react-router-dom';
-import { useState } from 'react';
+import { useState, useRef } from 'react';
+import {
+  createUser
+} from "../../utils/api";
 
 import './Signup.scss';
 import eyeIcon from '../../assets/eye-icon.svg';
@@ -9,6 +12,13 @@ function Signup() {
 
   const [isPasswordVisible, setIsPasswordVisible] = useState(false);
   const [isConfirmVisible, setIsConfirmVisible] = useState(false);
+  const [isUsernameMinimumErrorVisible, setIsUsernameMinimumErrorVisible] = useState(false);
+  const [isPasswordPatternErrorVisible, setIsPasswordPatternErrorVisible] = useState(false);
+  const [isConfirmPasswordMatchErrorVisible, setIsConfirmPasswordMatchErrorVisible] = useState(false);
+
+  const usernameInputRef = useRef(null);
+  const passwordInputRef = useRef(null);
+  const confirmPasswordInputRef = useRef(null);
 
   const handlePasswordVisibilityToggle = (event) => {
     event.preventDefault();
@@ -18,6 +28,44 @@ function Signup() {
   const handleConfirmVisibilityToggle = (event) => {
     event.preventDefault();
     setIsConfirmVisible(previousState => !previousState);
+  }
+
+  const handleCreateUser = async (event) => {
+    event.preventDefault();
+    const username = usernameInputRef.current.value;
+    const password = passwordInputRef.current.value;
+    const passwordRegex = /^(?=.*\d)(?=.*[`~!@#$%^&*()_\-+={}\[\]|\\:;"'<,>.?/]).{8,}$/;
+
+    // Check conditions for input error messages
+    if(username.length < 3) {
+      setIsUsernameMinimumErrorVisible(true);
+      return;
+    } else { setIsUsernameMinimumErrorVisible(false); }
+
+    if(!password.match(passwordRegex)) {
+      setIsPasswordPatternErrorVisible(true);
+      return;
+    } else { setIsPasswordPatternErrorVisible(false); }
+
+    if(passwordInputRef.current.value !== confirmPasswordInputRef.current.value) {
+      setIsConfirmPasswordMatchErrorVisible(true);
+      return;
+    } else { setIsConfirmPasswordMatchErrorVisible(false); }
+
+    // Create a user
+    try {
+      const response = await createUser(username, password);
+      if(!response.ok) {
+        throw new Error("Could not create user.");
+      }
+
+      // Hide all input error messages
+      setIsUsernameMinimumErrorVisible(false);
+      setIsPasswordPatternErrorVisible(false);
+      setIsConfirmPasswordMatchErrorVisible(false);
+    } catch(error) {
+      console.log( error );
+    }
   }
 
   return(
@@ -44,8 +92,11 @@ function Signup() {
                   id="signup-form__username-input"
                   className="signup-form__username-input"
                   placeholder="alemar20!"
+                  ref={usernameInputRef}
                 />
-                <p className="signup-form__username-minimum-msg">Must contain at least 3 characters.</p>
+                <p 
+                  className={`signup-form__username-minimum-msg ${isUsernameMinimumErrorVisible ? "signup-form__username-minimum-msg--show" : ""}`}
+                >Must contain at least 3 characters.</p>
                 <p className="signup-form__username-duplicate-msg">Username already taken.</p>
               </div>
 
@@ -57,12 +108,15 @@ function Signup() {
                     id="signup-form__password-input"
                     className="signup-form__password-input"
                     placeholder="********"
+                    ref={passwordInputRef}
                   />
                   <button className="signup-form__password-eye-btn" onClick={handlePasswordVisibilityToggle}>
                     <img src={eyeIcon} alt="Eye icon." className="signup-form__password-eye-icon" />
                   </button>
                 </div>
-                <p className="signup-form__password-pattern-msg">
+                <p
+                  className={`signup-form__password-pattern-msg ${isPasswordPatternErrorVisible ? "signup-form__password-pattern-msg--show" : ""}`}
+                >
                   Must include at least 8 characters, a number and a special character.
                 </p>
               </div>
@@ -75,18 +129,24 @@ function Signup() {
                     id="signup-form__confirm-input"
                     className="signup-form__confirm-input"
                     placeholder="********"
+                    ref={confirmPasswordInputRef}
                   />
                   <button className="signup-form__confirm-eye-btn" onClick={handleConfirmVisibilityToggle}>
                     <img src={eyeIcon} alt="Eye icon." className="signup-form__confirm-eye-icon" />
                   </button>
                 </div>
-                <p className="signup-form__confirm-match-msg">
+                <p 
+                  className={`signup-form__confirm-match-msg ${isConfirmPasswordMatchErrorVisible ? "signup-form__confirm-match-msg--show" : ""}`}
+                >
                   Does Not match password.
                 </p>
               </div>
 
               {/* Form Button */}
-              <button className="signup-form__btn">Sign Up</button>
+              <button 
+                className="signup-form__btn"
+                onClick={handleCreateUser}  
+              >Sign Up</button>
 
             </form>
 

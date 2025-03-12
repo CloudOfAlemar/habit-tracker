@@ -15,6 +15,10 @@ const userSchema = new Schema({
       "Password must include at least 8 characters, a number and a special character."
     ]
   },
+  trackers: [{
+    type: Schema.Types.ObjectId,
+    ref: "Tracker"
+  }]
 });
 
 const User = model("User", userSchema);

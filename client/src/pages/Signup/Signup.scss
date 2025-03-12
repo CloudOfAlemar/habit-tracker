@@ -90,7 +90,10 @@
   &__confirm-match-msg {
     font-size: 1.6rem;
     color: vars.$pink;
-    display: block;
+    display: none;
+    &--show {
+      display: block;
+    }
   }
 
   // Individual Styles
