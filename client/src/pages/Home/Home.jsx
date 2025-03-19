@@ -1,9 +1,12 @@
 
 import { Link } from 'react-router-dom';
+import { useContext } from 'react';
+import { AuthContext } from '../../context/AuthContext';
 import './Home.scss';
 import graphImg from '../../assets/graph-img.svg';
 
 function Home() {
+  const {isAuthenticated} = useContext(AuthContext);
   return (
     <main className="main">
       <section className="home">
@@ -25,13 +28,14 @@ function Home() {
               </p>
             </div>
 
-            {/* Home Buttons */}
-            {/* NOTE: switch these a tags to Link when routes are ready */}
             <div className="home__btns">
-              <Link to="/login" className="home__login-btn">Login</Link>
-              <Link to="/signup" className="home__signup-btn">Sign Up</Link>
-              {/* <a href="/" className="home__create-btn">Create</a>
-              <a href="/" className="home__view-btn">View</a> */}
+              {isAuthenticated ? (<>
+                <Link to="/create" className="home__create-btn">Create</Link>
+                <Link to="/view" className="home__view-btn">View</Link>
+              </>) : (<>
+                <Link to="/login" className="home__login-btn">Login</Link>
+                <Link to="/signup" className="home__signup-btn">Sign Up</Link>
+              </>)}
             </div>
           </div>
 

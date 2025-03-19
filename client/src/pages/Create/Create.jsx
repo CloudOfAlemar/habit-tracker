@@ -1,5 +1,7 @@
 
 import { useState, useRef, useEffect, createRef } from 'react';
+import { Link } from 'react-router-dom';
+import {createTracker, getUserTrackers} from "../../utils/api";
 
 import './Create.scss';
 
@@ -7,9 +9,9 @@ import caretIcon from '../../assets/caret-icon.svg';
 import trashIcon from '../../assets/trash-icon.svg';
 import linkArrowIcon from '../../assets/link-arrow-icon.svg';
 import birdImg from '../../assets/bird.svg';
-import { Link } from 'react-router-dom';
 
 function Create() {
+  const [userTrackers, setUserTrackers] = useState([]);
 
   // State Variables
   const [trackersList, setTrackersList] = useState(() => {
@@ -25,6 +27,7 @@ function Create() {
   const [isYearErrorVisible, setIsYearErrorVisible] = useState(false);
 
   const [trackerDropdowns, setTrackerDropdowns] = useState({});
+  const [userTrackerDropdowns, setUserTrackerDropdowns] = useState({});
 
   const [trackerDeleteSelected, setTrackerDeleteSelected] = useState({});
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
@@ -35,6 +38,7 @@ function Create() {
   const yearDropdownRef = useRef(null);
   const yearDropdownListRef = useRef(null);
   const trackerDropdownRefs = useRef({});
+  const userTrackerDropdownRefs = useRef([]);
 
   // Variables
   const currentYear = new Date().getFullYear();
@@ -140,37 +144,167 @@ function Create() {
     }
   }
 
+  const handleCreateTrackerBackend = async () => {
+    if(!trackerSelect.year && !trackerSelect.month) {
+      setIsYearErrorVisible(true);
+      setIsMonthErrorVisible(true);
+    } else if(!trackerSelect.year && trackerSelect.month) {
+      setIsYearErrorVisible(true);
+      setIsMonthErrorVisible(false);
+    } else if(trackerSelect.year && !trackerSelect.month) {
+      setIsYearErrorVisible(false);
+      setIsMonthErrorVisible(true);
+    } else {
+      const {year, month: {name, id}} = trackerSelect;
+      const doesTrackerExist = userTrackers
+        .find(tracker => tracker.year === parseInt(year))?.months
+        .some(month => month.monthName === name);
+      if(!doesTrackerExist) {
+        try {
+          const response = await createTracker(year, name, id);
+          const data = await response.json();
+          if(userTrackers.length === 0 || userTrackers.some(tracker => tracker.year !== data.year)) {
+            setUserTrackers(previousState => [
+              ...previousState,
+              {
+                year: data.year,
+                months: [{
+                  monthName: data.month,
+                  monthIndex: data.monthIndex,
+                  trackerId: data._id
+                }]
+              }
+            ]);
+          } else {
+            setUserTrackers(previousState => 
+              previousState.map(tracker => 
+                tracker.year === data.year
+                ? {
+                  ...tracker,
+                  months: [
+                    ...tracker.months,
+                    {monthName: data.month, monthIndex: data.monthIndex, trackerId: data._id}
+                  ]
+                }
+                : tracker
+              )
+            );
+          }
+        } catch(error) {
+          console.log( error )
+        }
+      }
+
+      setIsYearErrorVisible(false);
+      setIsMonthErrorVisible(false);
+      setMonthTogglerText("Month");
+      setYearTogglerText("Year");
+      setTrackerSelect({});
+    }
+  }
+
+  const handleDeleteTracker = async (yearToDelete, monthToDelete, trackerId) => {
+    setUserTrackers(previousState => 
+      previousState.map(tracker => 
+        tracker.year === yearToDelete
+        ? {
+          ...tracker,
+          months: tracker.months.filter(month => 
+            month.monthName !== monthToDelete
+          )
+        }
+        : tracker
+      ).filter(tracker => tracker.months.length !== 0)
+    );
+
+  }
+
   // Use Effects
 
-  // useEffect(() => {
-  //   console.log( `Tracker Select: `, trackerSelect )
-  // }, [trackerSelect]);
+  useEffect(() => {
+    const fetchUserTrackers = async () => {
+      try {
+        const response = await getUserTrackers();
+        const data = await response.json();
+
+        const organizedData = data.reduce((acc, tracker) => {
+          const existingYear = acc.find(accTracker => accTracker.year === tracker.year);
+          if(!existingYear) {
+            acc.push({
+              year: tracker.year,
+              months: [
+                {monthName: tracker.month, monthIndex: tracker.monthIndex, trackerId: tracker._id}
+              ]
+            })
+            return acc;
+          } else {
+            return acc.map(accTracker => 
+              accTracker.year === tracker.year
+              ? {
+                ...accTracker,
+                months: [
+                  ...accTracker.months,
+                  {monthName: tracker.month, monthIndex: tracker.monthIndex, trackerId: tracker._id}
+                ].sort((a,b) => a.monthIndex - b.monthIndex)
+              }
+              : accTracker
+            );
+          }
+        }, []).sort((a, b) => a.year - b.year);
+        
+        setUserTrackerDropdowns(() => 
+          organizedData.reduce((acc, data) => {
+            acc[`isDropdownOpen${data.year}`] = false;
+            return acc;
+          }, {})
+        );
+
+        console.log( data );
+        console.log( organizedData );
+        setUserTrackers(organizedData);
+      } catch(error) {
+        console.log( error )
+      }
+    } 
+    fetchUserTrackers();
+  }, []);
+
+  useEffect(() => {
+    console.log( userTrackers )
+  }, [userTrackers]);
+
+  useEffect(() => {
+    console.log( userTrackerDropdowns )
+  }, [userTrackerDropdowns]);
+
+  useEffect(() => {
+    console.log( `Tracker Select: `, trackerSelect )
+  }, [trackerSelect]);
 
   // useEffect(() => {
   //   console.log( trackerDropdowns )
   // }, [trackerDropdowns]);
 
-  // useEffect(()=> {
-  //   console.log( trackerDeleteSelected )
-  // },[trackerDeleteSelected]);
+  useEffect(()=> {
+    console.log( trackerDeleteSelected )
+  },[trackerDeleteSelected]);
 
-  useEffect(() => {
-    // console.log( trackersList )
+  // useEffect(() => {
     
-    trackersList.length !== 0 && localStorage.setItem("trackersList", JSON.stringify(trackersList));
-    trackersList.length === 0 && localStorage.removeItem("trackersList");
+  //   trackersList.length !== 0 && localStorage.setItem("trackersList", JSON.stringify(trackersList));
+  //   trackersList.length === 0 && localStorage.removeItem("trackersList");
 
-    trackersList.forEach(tracker => {
-      const year = tracker.year;
-      const dropdown = trackerDropdownRefs.current[`trackerDropdown${year}`].current;
-      if(
-        trackerDropdowns[`isOpen${year}`] &&
-        dropdown
-      ) {
-        dropdown.style.maxHeight = `${dropdown.scrollHeight}px`
-      }
-    });
-  }, [trackersList]);
+  //   trackersList.forEach(tracker => {
+  //     const year = tracker.year;
+  //     const dropdown = trackerDropdownRefs.current[`trackerDropdown${year}`].current;
+  //     if(
+  //       trackerDropdowns[`isOpen${year}`] &&
+  //       dropdown
+  //     ) {
+  //       dropdown.style.maxHeight = `${dropdown.scrollHeight}px`
+  //     }
+  //   });
+  // }, [trackersList]);
 
   useEffect(() => {
     const handleClickOutsideMonthDropdown = (event) => {
@@ -401,7 +535,10 @@ function Create() {
               {/* Create Button */}
               <button
                 className="create-tracker__create-btn"
-                onClick={handleCreateTracker}
+                onClick={() => {
+                  // handleCreateTracker();
+                  handleCreateTrackerBackend();
+                }}
               >Create</button>
             </div>
           </div>
@@ -414,7 +551,57 @@ function Create() {
             }}
           >
 
-            {trackersList.map((obj, trackerDropdownIndex) => {
+            {userTrackers.map((tracker, index) => {
+      
+              return (
+                <div className="tracker-dropdown" key={index}>
+
+                  <button 
+                    className="tracker-dropdown__year-toggler"
+                    style={{
+                      marginBottom: userTrackerDropdowns[`isDropdownOpen${tracker.year}`] ? "2rem" : "0"
+                    }}
+                    onClick={() => {
+                      
+                    }}
+                  >
+                    {tracker.year}
+                    <img
+                      src={caretIcon} alt="Caret arrow" 
+                      className="tracker-dropdown__year-toggler-caret-icon"
+                    />
+                  </button>
+                  
+                  <ul 
+                    className="tracker-dropdown__list"
+                    style={{
+                      
+                    }}  
+                  >
+                    {tracker.months.map((month, index) => (
+                      <li className="tracker-dropdown__item" key={index}>
+                        <Link to={`/view?year=${tracker.year}&month=${month.monthName}&monthid=${month.monthId}`} className="tracker-dropdown__link">
+                          <img src={linkArrowIcon} alt="Link arrow icon." className="tracker-dropdown__link-arrow-icon" />
+                          {month.monthName}
+                        </Link>
+                        <button
+                          className="tracker-dropdown__trash-btn"
+                          onClick={() => {
+                            setIsDeleteModalOpen(true);
+                            setTrackerDeleteSelected({year: tracker.year, month: month.monthName, trackerId: month.trackerId});
+                          }}
+                        >
+                          <img src={trashIcon} alt="Trash icon." className="tracker-dropdown__trash-btn-icon" />
+                        </button>
+                      </li>
+                    ))}
+                  </ul>
+
+                </div>
+              )
+            })}
+
+            {/* {trackersList.map((obj, trackerDropdownIndex) => {
               if(!trackerDropdownRefs.current[`trackerDropdown${obj.year}`]) {
                 trackerDropdownRefs.current[`trackerDropdown${obj.year}`] = createRef();
               }
@@ -474,7 +661,7 @@ function Create() {
                   </ul>
                 </div>
               )
-            })}
+            })} */}
 
           </div>
 
@@ -507,22 +694,17 @@ function Create() {
             <button
               className="delete-tracker-modal__delete-btn"
               onClick={()=> {
-                setTrackersList(previousState => {
-                  return previousState.map(tracker => 
-                    tracker.year === trackerDeleteSelected.year
-                    ? {
-                      ...tracker,
-                      months: tracker.months.filter(month => month.name !== trackerDeleteSelected.month.name)
-                    }
-                    : tracker
-                  ).filter(tracker => tracker.months.length !== 0)
-                });
+                const {year, month, trackerId} = trackerDeleteSelected;
+                handleDeleteTracker(year, month, trackerId);
                 setIsDeleteModalOpen(false);
               }}
             >Delete</button>
             <button 
               className="delete-tracker-modal__cancel-btn"
-              onClick={() => setIsDeleteModalOpen(false)}  
+              onClick={() => {
+                setIsDeleteModalOpen(false);
+                setTrackerDeleteSelected({});
+              }}  
             >Cancel</button>
           </div>
         </div>

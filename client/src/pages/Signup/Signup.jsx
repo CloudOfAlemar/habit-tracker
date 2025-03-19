@@ -1,6 +1,7 @@
 
-import { Link } from 'react-router-dom';
-import { useState, useRef } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
+import { useState, useRef, useContext } from 'react';
+import { AuthContext } from '../../context/AuthContext';
 import {
   createUser
 } from "../../utils/api";
@@ -9,10 +10,13 @@ import './Signup.scss';
 import eyeIcon from '../../assets/eye-icon.svg';
 
 function Signup() {
+  const navigate = useNavigate();
+  const {setIsAuthenticated} = useContext(AuthContext);
 
   const [isPasswordVisible, setIsPasswordVisible] = useState(false);
   const [isConfirmVisible, setIsConfirmVisible] = useState(false);
   const [isUsernameMinimumErrorVisible, setIsUsernameMinimumErrorVisible] = useState(false);
+  const [isUsernameDuplicateErrorVisible, setIsUsernameDuplicateErrorVisible] = useState(false);
   const [isPasswordPatternErrorVisible, setIsPasswordPatternErrorVisible] = useState(false);
   const [isConfirmPasswordMatchErrorVisible, setIsConfirmPasswordMatchErrorVisible] = useState(false);
 
@@ -55,14 +59,26 @@ function Signup() {
     // Create a user
     try {
       const response = await createUser(username, password);
-      if(!response.ok) {
-        throw new Error("Could not create user.");
+      const data = await response.json();
+      if(!response.ok && (data.error.code === 11000) ) {
+        setIsUsernameDuplicateErrorVisible(true);
+        throw new Error("Username already exists.");
+      } else if(!response.ok) {
+        throw new Error("User could not be created");
       }
 
       // Hide all input error messages
       setIsUsernameMinimumErrorVisible(false);
+      setIsUsernameDuplicateErrorVisible(false);
       setIsPasswordPatternErrorVisible(false);
       setIsConfirmPasswordMatchErrorVisible(false);
+
+      localStorage.setItem("token", data.token);
+      setIsAuthenticated(!!localStorage.getItem("token"));
+      navigate("/create");
+
+      // Include possible redirect.
+      // navigate("/create");
     } catch(error) {
       console.log( error );
     }
@@ -97,7 +113,9 @@ function Signup() {
                 <p 
                   className={`signup-form__username-minimum-msg ${isUsernameMinimumErrorVisible ? "signup-form__username-minimum-msg--show" : ""}`}
                 >Must contain at least 3 characters.</p>
-                <p className="signup-form__username-duplicate-msg">Username already taken.</p>
+                <p 
+                  className={`signup-form__username-duplicate-msg ${isUsernameDuplicateErrorVisible ? "signup-form__username-duplicate-msg--show" : ""}`}
+                >Username already taken.</p>
               </div>
 
               {/* Password Control */}

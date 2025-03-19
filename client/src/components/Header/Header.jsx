@@ -1,7 +1,8 @@
 
 // Imports
 import { Link } from 'react-router-dom';
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, useContext } from 'react';
+import {AuthContext} from "../../context/AuthContext";
 
 import './Header.scss';
 
@@ -10,6 +11,7 @@ import burgerIcon from '../../assets/burger-icon.svg';
 
 // Component
 function Header() {
+  const {isAuthenticated, setIsAuthenticated} = useContext(AuthContext);
   
   // States
   const [topnavListState, setTopnavListState] = useState({
@@ -112,41 +114,50 @@ function Header() {
                 tabIndex={topnavListLinkTabable}
               >Home</Link>
             </li>
-            <li className="topnav-list__item">
-              <Link
-                to={"/create"}
-                className="topnav-list__link"
-                tabIndex={topnavListLinkTabable}
-              >Create</Link>
-            </li>
-            <li className="topnav-list__item">
-              <Link
-                to={"/view"}
-                className="topnav-list__link"
-                tabIndex={topnavListLinkTabable}
-              >View</Link>
-            </li>
-            <li className="topnav-list__item">
-              <Link
-                to={"/login"}
-                className="topnav-list__link"
-                tabIndex={topnavListLinkTabable}
-              >Login</Link>
-            </li>
-            <li className="topnav-list__item">
-              <Link
-                to={"/signup"}
-                className="topnav-list__link"
-                tabIndex={topnavListLinkTabable}
-              >Sign Up</Link>
-            </li>
-            {/* <li className="topnav-list__item">
-              <Link
-                to={"/"}
-                className="topnav-list__link"
-                tabIndex={topnavListLinkTabable}
-              >Logout</Link>
-            </li> */}
+
+            {isAuthenticated ? (<>
+              <li className="topnav-list__item">
+                <Link
+                  to={"/create"}
+                  className="topnav-list__link"
+                  tabIndex={topnavListLinkTabable}
+                >Create</Link>
+              </li>
+              <li className="topnav-list__item">
+                <Link
+                  to={"/view"}
+                  className="topnav-list__link"
+                  tabIndex={topnavListLinkTabable}
+                >View</Link>
+              </li>
+              <li className="topnav-list__item">
+                <Link
+                  to={"/login"}
+                  className="topnav-list__link"
+                  tabIndex={topnavListLinkTabable}
+                  onClick={() => {
+                    localStorage.removeItem("token");
+                    setIsAuthenticated(!!localStorage.getItem("token"));
+                  }}
+                >Logout</Link>
+              </li>
+            </>) : (<>
+              <li className="topnav-list__item">
+                <Link
+                  to={"/login"}
+                  className="topnav-list__link"
+                  tabIndex={topnavListLinkTabable}
+                >Login</Link>
+              </li>
+              <li className="topnav-list__item">
+                <Link
+                  to={"/signup"}
+                  className="topnav-list__link"
+                  tabIndex={topnavListLinkTabable}
+                >Sign Up</Link>
+              </li>
+            </>)}
+          
           </ul>
 
         </div>
