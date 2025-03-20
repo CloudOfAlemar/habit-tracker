@@ -14,12 +14,21 @@ const trackerSchema = new Schema({
     required: true
   },
   habits: [{
-    type: Schema.Types.ObjectId,
-    ref: "Habit"
+    type: String
   }],
   days: [{
-    type: Schema.Types.ObjectId,
-    ref: "Day"
+    day: {type: String},
+    dayOfMonth: {type: Number},
+    date: {type: Date},
+    journalHabits: [{
+      habitTitle: {type: String},
+      habitStatus: {
+        type: String,
+        enum: ["green", "yellow", "red", ""],
+        default: ""
+      },
+      habitNotes: [{type: String}]
+    }]
   }],
   user: {
     type: Schema.Types.ObjectId,

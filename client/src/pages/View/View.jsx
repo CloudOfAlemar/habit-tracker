@@ -2,6 +2,7 @@
 
 import { Link, useLocation } from 'react-router-dom';
 import { useState, useRef, useEffect, useMemo, createRef } from 'react';
+import { getUserTrackers } from "../../utils/api";
 import './View.scss';
 
 import caretIcon from '../../assets/caret-icon.svg';
@@ -18,6 +19,7 @@ function View() {
   // Javascript Web API - URLSearchParams(URL): provides methods to manipulate
   // URL parameters.
   const queryParams = new URLSearchParams(location.search);
+  const trackerIdParam = queryParams.get("trackerId");
 
   // React Hook - useRef: stores a reference of a DOM element to manipulate it
   // directly or stores a mutable value that doesn't trigger a re-render.
@@ -41,12 +43,15 @@ function View() {
   const [isDeleteHabitModalOpen, setIsDeleteHabitModalOpen] = useState(false);
   const [habitToDelete, setHabitToDelete] = useState("");
 
+  const [currentTracker, setCurrentTracker] = useState({});
+  const [userTrackers, setUserTrackers] = useState([]);
+
   // React Hook - useMemo: used to recompute a value with a heavy calculation
   // only when the dependency changes and NOT on every render.
   const data = useMemo(() => {
     const year = queryParams.get("year");
     const month = queryParams.get("month");
-    const monthid = queryParams.get("monthid");
+    const monthId = queryParams.get("monthId");
     const currentHabits = () => {
       return trackersList.find(tracker => tracker.year === data.year)
         ?.months.find(month => month.name === data.month)?.habits || [];
@@ -59,7 +64,7 @@ function View() {
     return {
       year,
       month,
-      monthid,
+      monthId,
       currentHabits,
       currentDays
     }
@@ -119,6 +124,33 @@ function View() {
   }
 
   // React Hook - useEffect: runs code when a dependency variable changes.
+  useEffect(() => {
+    const fetchUserTrackers = async () => {
+      try {
+        const response = await getUserTrackers();
+        const userTrackersData = await response.json();
+
+        const sortedTrackersData = userTrackersData.sort((a, b) => 
+          a.year !== b.year ? a.year - b.year : a.monthIndex - b.monthIndex
+        );
+
+        setUserTrackers(sortedTrackersData);
+        setCurrentTracker(userTrackersData.find(tracker => tracker._id === queryParams.get("trackerId")));
+        console.log( "User Trackers Data: ", userTrackersData );
+      } catch(error) {
+        console.log( error )
+      }
+    }
+    fetchUserTrackers();
+  }, [trackerIdParam]);
+
+  useEffect(() => {
+    console.log( "Current Tracker: ", currentTracker );
+  }, [currentTracker]);
+
+  useEffect(() => {
+    console.log( "User Trackers: ", userTrackers );
+  }, [userTrackers]);
 
   useEffect(() => {
     trackersList.length > 0 && localStorage.setItem("trackersList", JSON.stringify(trackersList));
@@ -168,7 +200,7 @@ function View() {
                   setIsDropdownOpen(previousState => !previousState);
                 }}   
               >
-                {`${data.month || "Month"} (${data.year || "Year"})`}
+                {`${currentTracker?.month || "Month"} (${currentTracker?.year || "Year"})`}
                 <img 
                   src={caretIcon} alt="Caret icon." 
                   className={`view-dropdown__toggler-caret-icon ${isDropdownOpen ? "view-dropdown__toggler-caret-icon--rotate" : ""}`} 
@@ -183,18 +215,34 @@ function View() {
                   border: isDropdownOpen ? "1px solid #EFEFEF" : "1px solid transparent"
                 }}
               >
-                {trackersList.flatMap(tracker =>
+                {userTrackers
+                  .filter(tracker => tracker._id !== currentTracker?._id)
+                  .map((tracker, index) => (
+                    <li className="view-dropdown__item" key={index}>
+                      <Link 
+                        to={`/view?trackerId=${tracker._id}`} 
+                        className="view-dropdown__option"
+                        onClick={() => {
+                          setIsDropdownOpen(previousState => !previousState);
+                          
+                        }} 
+                      >{`${tracker.month} ${tracker.year}`}
+                      </Link>
+                    </li>
+                  ))}
+
+                {/* {trackersList.flatMap(tracker =>
                   tracker.months.map(({name, id}) => (
                     <li className="view-dropdown__item" key={`${tracker.year}-${id}`}>
                       <Link 
-                        to={`/view?year=${tracker.year}&month=${name}&monthid=${id}`} 
+                        to={`/view?year=${tracker.year}&month=${name}&monthId=${id}`} 
                         className="view-dropdown__option"
                         onClick={() => setIsDropdownOpen(previousState => !previousState)}  
                       >{`${name} ${tracker.year}`}
                       </Link>
                     </li>
                   ))
-                )}
+                )} */}
               </ul>
             </div>
 

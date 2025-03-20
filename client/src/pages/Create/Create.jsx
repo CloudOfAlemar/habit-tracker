@@ -156,12 +156,26 @@ function Create() {
       setIsMonthErrorVisible(true);
     } else {
       const {year, month: {name, id}} = trackerSelect;
+
+      const daysToInsert = [...Array(new Date(year, parseInt(id) + 1, 0).getDate())]
+        .map((_, index) => {
+          const date = new Date(year, id, index + 1);
+          const day = date.toLocaleDateString("en-US", {weekday: "long"});
+          const dayOfMonth = index + 1;
+          return {
+            day,
+            dayOfMonth,
+            date,
+            journalHabits: []
+          }
+        });
+
       const doesTrackerExist = userTrackers
         .find(tracker => tracker.year === parseInt(year))?.months
         .some(month => month.monthName === name);
       if(!doesTrackerExist) {
         try {
-          const response = await createTracker(year, name, id);
+          const response = await createTracker(year, name, id, daysToInsert);
           const data = await response.json();
           if(userTrackers.length === 0 || userTrackers.every(tracker => tracker.year !== data.year)) {
             setUserTrackers(previousState => [
@@ -266,7 +280,7 @@ function Create() {
         );
 
         console.log( "Tracker Data: ", data );
-        console.log( organizedData );
+        console.log( "Organized Data: ", organizedData );
         setUserTrackers(organizedData);
       } catch(error) {
         console.log( error )
@@ -586,7 +600,7 @@ function Create() {
                   >
                     {tracker.months.map((month, index) => (
                       <li className="tracker-dropdown__item" key={index}>
-                        <Link to={`/view?year=${tracker.year}&month=${month.monthName}&monthid=${month.monthId}`} className="tracker-dropdown__link">
+                        <Link to={`/view?trackerId=${month.trackerId}`} className="tracker-dropdown__link">
                           <img src={linkArrowIcon} alt="Link arrow icon." className="tracker-dropdown__link-arrow-icon" />
                           {month.monthName}
                         </Link>

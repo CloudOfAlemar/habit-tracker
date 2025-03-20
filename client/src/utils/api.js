@@ -24,7 +24,7 @@ export const login = (username, password) => {
   });
 }
 
-export const createTracker = (year, month, monthIndex) => {
+export const createTracker = (year, month, monthIndex, daysToInsert) => {
   const token = localStorage.getItem("token");
   return fetch("/api/trackers", {
     method: "POST",
@@ -35,7 +35,8 @@ export const createTracker = (year, month, monthIndex) => {
     body: JSON.stringify({
       year,
       month,
-      monthIndex
+      monthIndex,
+      daysToInsert
     })
   })
 }

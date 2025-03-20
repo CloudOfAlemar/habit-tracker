@@ -3,10 +3,18 @@ const {Tracker, User} = require("../models");
 module.exports = {
   async createTracker(req, res) {
     try{
-      const {year, month, monthIndex} = req.body;
+      const {year, month, monthIndex, daysToInsert} = req.body;
       const userId = req.user.id;
 
-      const newlyCreatedTracker = await Tracker.create({year, month, monthIndex, user: userId});
+      const newlyCreatedTracker = await Tracker.create({
+        year,
+        month,
+        monthIndex,
+        habits: [],
+        days: daysToInsert,
+        user: userId
+      });
+
       if(!newlyCreatedTracker) {
         return res.status(400).json({message: "Unable to create Tracker."})
       }
@@ -59,6 +67,3 @@ module.exports = {
     }
   }
 }
-
-// NOTE: delete trackers from users when deleting 
-// Fix userTrackers sorting when deleting and adding new trackers
