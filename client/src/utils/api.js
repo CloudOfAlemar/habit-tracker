@@ -40,8 +40,16 @@ export const createTracker = (year, month, monthIndex) => {
   })
 }
 
-export const deleteTracker = () => {
-
+export const deleteTracker = (trackerId) => {
+  const token = localStorage.getItem("token");
+  return fetch("/api/trackers/delete", {
+    method: "POST",
+    headers: {
+      "Content-Type" : "application/json",
+      Authorization : `Bearer ${token}`
+    },
+    body: JSON.stringify({trackerId})
+  });
 }
 
 export const getUserTrackers = () => {

@@ -1,7 +1,7 @@
 
 import { useState, useRef, useEffect, createRef } from 'react';
 import { Link } from 'react-router-dom';
-import {createTracker, getUserTrackers} from "../../utils/api";
+import {createTracker, getUserTrackers, deleteTracker} from "../../utils/api";
 
 import './Create.scss';
 
@@ -163,7 +163,7 @@ function Create() {
         try {
           const response = await createTracker(year, name, id);
           const data = await response.json();
-          if(userTrackers.length === 0 || userTrackers.some(tracker => tracker.year !== data.year)) {
+          if(userTrackers.length === 0 || userTrackers.every(tracker => tracker.year !== data.year)) {
             setUserTrackers(previousState => [
               ...previousState,
               {
@@ -174,7 +174,7 @@ function Create() {
                   trackerId: data._id
                 }]
               }
-            ]);
+            ].sort((a, b) => a.year - b.year));
           } else {
             setUserTrackers(previousState => 
               previousState.map(tracker => 
@@ -184,7 +184,7 @@ function Create() {
                   months: [
                     ...tracker.months,
                     {monthName: data.month, monthIndex: data.monthIndex, trackerId: data._id}
-                  ]
+                  ].sort((a, b) => a.monthIndex - b.monthIndex)
                 }
                 : tracker
               )
@@ -204,19 +204,25 @@ function Create() {
   }
 
   const handleDeleteTracker = async (yearToDelete, monthToDelete, trackerId) => {
-    setUserTrackers(previousState => 
-      previousState.map(tracker => 
-        tracker.year === yearToDelete
-        ? {
-          ...tracker,
-          months: tracker.months.filter(month => 
-            month.monthName !== monthToDelete
-          )
-        }
-        : tracker
-      ).filter(tracker => tracker.months.length !== 0)
-    );
-
+    try {
+      const response = await deleteTracker(trackerId);
+      const data = await response.json();
+      setUserTrackers(previousState => 
+        previousState.map(tracker => 
+          tracker.year === yearToDelete
+          ? {
+            ...tracker,
+            months: tracker.months.filter(month => 
+              month.monthName !== monthToDelete
+            )
+          }
+          : tracker
+        ).filter(tracker => tracker.months.length !== 0)
+      );
+      console.log( data )
+    } catch(error) {
+      console.log( error );
+    }
   }
 
   // Use Effects
@@ -259,7 +265,7 @@ function Create() {
           }, {})
         );
 
-        console.log( data );
+        console.log( "Tracker Data: ", data );
         console.log( organizedData );
         setUserTrackers(organizedData);
       } catch(error) {
@@ -270,7 +276,7 @@ function Create() {
   }, []);
 
   useEffect(() => {
-    console.log( userTrackers )
+    console.log( "User Trackers: ", userTrackers )
   }, [userTrackers]);
 
   useEffect(() => {
@@ -547,7 +553,7 @@ function Create() {
           <div 
             className="create__tracker-dropdowns"
             style={{
-              display: trackersList.length === 0 ? "none" : "flex"
+              display: userTrackers.length === 0 ? "none" : "flex"
             }}
           >
 
@@ -665,7 +671,7 @@ function Create() {
 
           </div>
 
-          {trackersList.length === 0 && (
+          {userTrackers.length === 0 && (
             <div className="missing-single-chart">
             <div className="missing-single-chart__img-wrapper">
               <img 
