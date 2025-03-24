@@ -38,7 +38,7 @@ function Create() {
   const yearDropdownRef = useRef(null);
   const yearDropdownListRef = useRef(null);
   const trackerDropdownRefs = useRef({});
-  const userTrackerDropdownRefs = useRef([]);
+  const userTrackerDropdownRefs = useRef({});
 
   // Variables
   const currentYear = new Date().getFullYear();
@@ -280,7 +280,6 @@ function Create() {
         );
 
         console.log( "Tracker Data: ", data );
-        console.log( "Organized Data: ", organizedData );
         setUserTrackers(organizedData);
       } catch(error) {
         console.log( error )
@@ -290,11 +289,19 @@ function Create() {
   }, []);
 
   useEffect(() => {
+    userTrackers.forEach(tracker => {
+      const containerRefs = userTrackerDropdownRefs.current;
+      if(!containerRefs[`trackerDropdown${tracker.year}`]) {
+        containerRefs[`trackerDropdown${tracker.year}`] = null;
+      }
+    })
+
     console.log( "User Trackers: ", userTrackers )
+    console.log( "User Tracker Dropdown Refs: ", userTrackerDropdownRefs.current );
   }, [userTrackers]);
 
   useEffect(() => {
-    console.log( userTrackerDropdowns )
+    console.log( "User Tracker Dropdowns: ", userTrackerDropdowns )
   }, [userTrackerDropdowns]);
 
   useEffect(() => {
@@ -572,7 +579,7 @@ function Create() {
           >
 
             {userTrackers.map((tracker, index) => {
-      
+              
               return (
                 <div className="tracker-dropdown" key={index}>
 
@@ -582,7 +589,18 @@ function Create() {
                       marginBottom: userTrackerDropdowns[`isDropdownOpen${tracker.year}`] ? "2rem" : "0"
                     }}
                     onClick={() => {
-                      
+                      setUserTrackerDropdowns(previousState => {
+                        const closedDropdowns = Object.entries(previousState)
+                          .reduce((acc, [key, value]) => {
+                            acc[key] = false;
+                            return acc;
+                          }, {});
+                        if(previousState[`isDropdownOpen${tracker.year}`]) {
+                          return closedDropdowns;
+                        } else {
+                          return {...closedDropdowns, [`isDropdownOpen${tracker.year}`]: true}
+                        }
+                      })
                     }}
                   >
                     {tracker.year}
@@ -593,9 +611,12 @@ function Create() {
                   </button>
                   
                   <ul 
+                    ref={element => userTrackerDropdownRefs.current[`trackerDropdown${tracker.year}`] = element}
                     className="tracker-dropdown__list"
                     style={{
-                      
+                      maxHeight: userTrackerDropdowns[`isDropdownOpen${tracker.year}`] 
+                        ? `${userTrackerDropdownRefs.current[`trackerDropdown${tracker.year}`].scrollHeight}px`
+                        : "0px"
                     }}  
                   >
                     {tracker.months.map((month, index) => (

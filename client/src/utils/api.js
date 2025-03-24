@@ -63,3 +63,15 @@ export const getUserTrackers = () => {
     }
   });
 }
+
+export const updateHabits = (trackerId, habits, days) => {
+  const token = localStorage.getItem("token");
+  return fetch("/api/trackers/habits", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`
+    },
+    body: JSON.stringify({trackerId, habits, days})
+  });
+}

@@ -2,7 +2,7 @@
 
 import { Link, useLocation } from 'react-router-dom';
 import { useState, useRef, useEffect, useMemo, createRef } from 'react';
-import { getUserTrackers } from "../../utils/api";
+import { getUserTrackers, updateHabits } from "../../utils/api";
 import './View.scss';
 
 import caretIcon from '../../assets/caret-icon.svg';
@@ -72,40 +72,42 @@ function View() {
 
   // Functions
   const getSingleChartRowsCount = () => {
-    const completeRows = Math.floor(data.currentDays().length / 7);
-    const incompleteRows = data.currentDays().length % 7;
+    const completeRows = Math.floor(currentTracker.days.length / 7);
+    const incompleteRows = currentTracker.days.length % 7;
     return incompleteRows ? completeRows + 1 : completeRows;
   }
 
-  const deleteHabit = (habitToDelete) => {
-    setTrackersList(previousState => 
-      previousState.map(tracker => 
-        tracker.year === data.year ?
-        {
-          ...tracker,
-          months: tracker.months.map(month => 
-            month.name === data.month
-            ? {
-              ...month,
-              habits: month.habits.filter(habit => 
-                habit !== habitToDelete
-              ),
-              days: month.days.map(day => ({
-                ...day,
-                journal: {
-                  habitsLog : day.journal.habitsLog.filter(habitLog => 
-                    habitLog.title !== habitToDelete
-                  )
-                }
-              }))
-            }
-            : month
-          )
-        } :
-        tracker
-      )
-    )
-  }
+  // const deleteHabit = (habitToDelete) => {
+  //   setTrackersList(previousState => 
+  //     previousState.map(tracker => 
+  //       tracker.year === data.year ?
+  //       {
+  //         ...tracker,
+  //         months: tracker.months.map(month => 
+  //           month.name === data.month
+  //           ? {
+  //             ...month,
+  //             habits: month.habits.filter(habit => 
+  //               habit !== habitToDelete
+  //             ),
+  //             days: month.days.map(day => ({
+  //               ...day,
+  //               journal: {
+  //                 habitsLog : day.journal.habitsLog.filter(habitLog => 
+  //                   habitLog.title !== habitToDelete
+  //                 )
+  //               }
+  //             }))
+  //           }
+  //           : month
+  //         )
+  //       } :
+  //       tracker
+  //     )
+  //   )
+  // }
+
+
 
   const updateEditJournalStatus = (event, habitLog) => {
     const status = event.target.dataset.statusColor;
@@ -120,6 +122,41 @@ function View() {
         }
         : log
       )
+    }));
+  }
+
+  const handleAddHabit = () => {
+    if(newHabitInputRef.current && newHabitInputRef.current.value !== "") {
+      const newHabit = newHabitInputRef.current.value;
+      setCurrentTracker(previousState => ({
+        ...previousState,
+        habits: [...previousState.habits, newHabit],
+        days: previousState.days.map(dayObj => ({
+          ...dayObj,
+          journalHabits: [
+            ...dayObj.journalHabits,
+            {
+              habitTitle: newHabit,
+              habitStatus: "",
+              habitNotes: []
+            }
+          ]
+        }))
+      }));
+      setIsNewHabitModalOpen(previousState => !previousState);
+    }
+  }
+
+  const handleDeleteHabit = (habitToDelete) => {
+    setCurrentTracker(previousState => ({
+      ...previousState,
+      habits: previousState.habits.filter(habit => habit !== habitToDelete),
+      days: previousState.days.map(dayObj => ({
+        ...dayObj,
+        journalHabits: dayObj.journalHabits.filter(habitObj => 
+          habitObj.habitTitle !== habitToDelete
+        )
+      }))
     }));
   }
 
@@ -143,6 +180,25 @@ function View() {
     }
     fetchUserTrackers();
   }, [trackerIdParam]);
+
+  useEffect(() => {
+    const updateHabitsBackend = async () => {
+      try{
+        const response = await updateHabits(
+          currentTracker._id,
+          currentTracker.habits,
+          currentTracker.days
+        );
+        const updatedTracker = await response.json();
+        console.log( "Upated Tracker: ", updatedTracker );
+      }catch(error) {
+        console.log( error );
+      }
+    }
+    if(currentTracker?.habits) {
+      updateHabitsBackend();
+    }
+  }, [currentTracker?.habits]);
 
   useEffect(() => {
     console.log( "Current Tracker: ", currentTracker );
@@ -250,7 +306,7 @@ function View() {
             <div 
               className="full-chart"
               style={{
-                display: !data.year ? "none" : "flex"
+                display: !currentTracker?.year ? "none" : "flex"
               }}
             >
 
@@ -268,7 +324,7 @@ function View() {
                 {/* Habit Side Body */}
                 <div className="full-chart__habit-side-body">
 
-                  {data.currentHabits().map((habit, index) => (
+                  {currentTracker?.habits?.map((habit, index) => (
                     <p className="full-chart__habit-title" key={index}>{habit}</p>
                   ))}
                   
@@ -281,73 +337,46 @@ function View() {
                 {/* Tracking Side Header */}
                 <div className="full-chart__tracking-side-header">
 
-                  {trackersList.length > 0 && trackersList
-                    .find(tracker => tracker.year === data.year)?.months
-                    .find(month => month.name === data.month).days
-                    .map(({name, dayOfTheMonth, date, journal: {habitsLog}}, index) => {
-                      const dayLetter = name.charAt(0);
-                      return (
-                        <div className="full-chart__pill" key={index}>
-                          <button 
-                            className="full-chart__journal-btn"
-                            onClick={() => {
-                              setIsJournalOpen(previousState => !previousState);
-                              setCurrentJournalData(previousState => {
-                                const currentDate = new Date(date);
-                                const weekday = currentDate.toLocaleDateString("en-US", {weekday: "long"});
-                                const currentYear = currentDate.getFullYear();
-                                const currentShortMonth = currentDate.toLocaleDateString("en-US", {month: "short"});
-                                const currentShortWeekday = currentDate.toLocaleDateString("en-US", {weekday: "short"});
-                                const currentTwoDigitDay = currentDate.toLocaleDateString("en-US", {day: "2-digit"});
-                                const dayOfTheMonth = currentDate.getDate();
-                                
-                                return {
-                                  ...previousState,
-                                  year: currentYear,
-                                  shortMonth: currentShortMonth,
-                                  shortWeekday: currentShortWeekday,
-                                  twoDigitDay: currentTwoDigitDay,
-                                  weekday,
-                                  currentDate,
-                                  dayOfTheMonth,
-                                  habitsLog
-                                }
-                              })
-                            }}
-                          >
-                            <img src={editIcon} alt="Edit icon." className="full-chart__edit-icon" />
-                          </button>
-                          <div className="full-chart__short-date">
-                            <span className="full-chart__short-date-letter">{dayLetter}</span>
-                            <span className="full-chart__short-date-number">{dayOfTheMonth}</span>
-                          </div>
-                        </div> 
-                      )
-                    })}
+                  {currentTracker?.days?.map((trackerDay, index) => {
+                    const dayOfMonth = new Date(trackerDay.date).toLocaleDateString("en-US", {day: "2-digit"});
+                    const dayLetter = trackerDay?.day?.charAt(0);
+                    return (
+                      <div className="full-chart__pill" key={index}>
+                        <button 
+                          className="full-chart__journal-btn"
+                        >
+                          <img src={editIcon} alt="Edit icon." className="full-chart__edit-icon" />
+                        </button>
+                        <div className="full-chart__short-date">
+                          <span className="full-chart__short-date-letter">{dayLetter}</span>
+                          <span className="full-chart__short-date-number">{dayOfMonth}</span>
+                        </div>
+                      </div>
+                    )
+                  })}
 
                 </div>
 
                 {/* Tracking Side Body */}
                 <div className="full-chart__tracking-side-body">
 
-                  {data.currentHabits().map((habit, index) => {
+                  {currentTracker?.habits?.map((habit, index) => {
                     return (
                       <div className="full-chart__bullet-row" key={index}>
-                        {data.currentDays().map((day, index) => {
-                          const habitLog = day.journal.habitsLog.find(log => 
-                            log.title === habit
-                          );
+                        {currentTracker.days.map((day, index) => {
+                          const habitObj = day.journalHabits
+                            ?.find(habitObj => habitObj.habitTitle === habit);
                           return (
                             <span 
                               className="full-chart__bullet"
                               key={index}
                               style={{
                                 backgroundColor: `${
-                                  habitLog.status === "green"
+                                  habitObj?.habitStatus === "green"
                                   ? "#C9FFC8"
-                                  : habitLog.status === "yellow"
+                                  : habitObj?.habitStatus === "yellow"
                                   ? "#FFFEC8"
-                                  : habitLog.status === "red"
+                                  : habitObj?.habitStatus === "red"
                                   ? "#FFE3E9"
                                   : "transparent"
                                 }`
@@ -369,7 +398,7 @@ function View() {
           {/* View Single */}
           <div className="view__single">
 
-            {data.currentHabits().map((habit, index) => {
+            {currentTracker?.habits?.map((habit, index) => {
               let count = 0;
               return (
               
@@ -397,7 +426,7 @@ function View() {
                     {/* Work on displaying status color */}
   
                     {[...Array(getSingleChartRowsCount())].map((_,index) => {
-                      const totalDays = data.currentDays().length;
+                      const totalDays = currentTracker.days.length;
                       const isLastRow = index === getSingleChartRowsCount() - 1;
                       const remainingBullets = totalDays % 7;
                       const bulletCount = isLastRow && remainingBullets !== 0  ? remainingBullets : 7;
@@ -405,9 +434,9 @@ function View() {
                         <div className="single-chart__bullet-row" key={index}>
                           {[...Array(bulletCount)].map((_, index) => {
                             count++;
-                            const bulletStatus = data.currentDays()
-                              .find(day => day.dayOfTheMonth === count).journal.habitsLog
-                              .find(habitLog => habitLog.title === habit).status;
+                            const bulletStatus = currentTracker.days
+                              .find(day => day.dayOfMonth === count)?.journalHabits
+                              .find(habitObj => habitObj.habitTitle === habit)?.habitStatus;
 
                             return (
                               <span 
@@ -478,46 +507,7 @@ function View() {
             <button
               className="new-habit-modal__add-btn"
               onClick={() => {
-                // Extract Logic into smaller functions to avoid deep nesting
-                if(
-                  newHabitInputRef.current &&
-                  newHabitInputRef.current.value !== ""
-                ) {
-                  // Updates trackersList with new Habit
-                  setTrackersList(previousState => 
-                    previousState.map(tracker => 
-                      tracker.year === data.year
-                      ? {
-                          ...tracker,
-                          months: tracker.months.map(month => 
-                            month.name === data.month
-                            ? {
-                                ...month,
-                                habits: [...(month.habits ?? []), newHabitInputRef.current.value],
-                                days: month.days.map(day => 
-                                  ({
-                                    ...day,
-                                    journal: {
-                                      habitsLog: [
-                                        ...day.journal.habitsLog,
-                                        {
-                                          title: newHabitInputRef.current.value,
-                                          status: "",
-                                          notes: []
-                                        }
-                                      ]
-                                    }
-                                  })
-                                )
-                              }
-                            : month
-                          )
-                        } 
-                      : tracker
-                    )
-                  );
-                  setIsNewHabitModalOpen(previousState => !previousState);
-                }
+                handleAddHabit();
               }}
             >Add</button>
             <button
@@ -823,7 +813,8 @@ function View() {
             <button 
               className="delete-habit-modal__delete-btn"
               onClick={() => {
-                deleteHabit(habitToDelete);
+                // deleteHabit(habitToDelete);
+                handleDeleteHabit(habitToDelete);
                 setIsDeleteHabitModalOpen(previousState => !previousState);
               }}
             >Delete</button>

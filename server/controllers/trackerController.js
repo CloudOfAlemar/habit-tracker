@@ -65,5 +65,24 @@ module.exports = {
     }catch(error) {
       res.status(500).json({message: "Server Error: Failed to Delete Tracker", error: error.message});
     }
+  },
+  async updateHabits(req, res) {
+    try {
+      const {habits, days, trackerId} = req.body;
+      const updatedTracker = await Tracker.findByIdAndUpdate(
+        trackerId,
+        {$set: {habits, days}},
+        {new: true}
+      );
+
+      if(!updatedTracker) {
+        return res.status(400).json({message: "Unable to find tracker to update"});
+      }
+
+      res.status(200).json(updatedTracker);
+      
+    } catch(error) {
+      res.status(500).json({message: "Server Error: Failed to update habit", error: error.message});
+    }
   }
 }
