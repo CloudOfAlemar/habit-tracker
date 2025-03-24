@@ -77,8 +77,6 @@ function Signup() {
       setIsAuthenticated(!!localStorage.getItem("token"));
       navigate("/create");
 
-      // Include possible redirect.
-      // navigate("/create");
     } catch(error) {
       console.log( error );
     }

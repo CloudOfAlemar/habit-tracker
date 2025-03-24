@@ -95,7 +95,6 @@ module.exports = {
         {new: true}
       );
 
-      //NOTE: fix
       if(!updatedTracker) {
         return res.status(400).json({message: "Failed to update journal habits"});
       }

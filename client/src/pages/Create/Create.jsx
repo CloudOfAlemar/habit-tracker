@@ -1,5 +1,5 @@
 
-import { useState, useRef, useEffect, createRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import {createTracker, getUserTrackers, deleteTracker} from "../../utils/api";
 
@@ -14,10 +14,6 @@ function Create() {
   const [userTrackers, setUserTrackers] = useState([]);
 
   // State Variables
-  const [trackersList, setTrackersList] = useState(() => {
-    const trackersListStorage = localStorage.getItem("trackersList");
-    return trackersListStorage ? JSON.parse(trackersListStorage) : [];
-  });
   const [trackerSelect, setTrackerSelect] = useState({});
   const [isMonthDropdownOpen, setIsMonthDropdownOpen] = useState(false);
   const [isYearDropdownOpen, setIsYearDropdownOpen] = useState(false);
@@ -26,7 +22,6 @@ function Create() {
   const [isMonthErrorVisible, setIsMonthErrorVisible] = useState(false);
   const [isYearErrorVisible, setIsYearErrorVisible] = useState(false);
 
-  const [trackerDropdowns, setTrackerDropdowns] = useState({});
   const [userTrackerDropdowns, setUserTrackerDropdowns] = useState({});
 
   const [trackerDeleteSelected, setTrackerDeleteSelected] = useState({});
@@ -37,7 +32,6 @@ function Create() {
   const monthDropdownListRef = useRef(null);
   const yearDropdownRef = useRef(null);
   const yearDropdownListRef = useRef(null);
-  const trackerDropdownRefs = useRef({});
   const userTrackerDropdownRefs = useRef({});
 
   // Variables
@@ -72,76 +66,6 @@ function Create() {
     setYearTogglerText(event.target.textContent);
     setIsYearErrorVisible(false);
     setIsYearDropdownOpen(previousState => !previousState)
-  }
-
-  const handleCreateTracker = () => {
-    if(!trackerSelect.year && !trackerSelect.month) {
-      setIsYearErrorVisible(true);
-      setIsMonthErrorVisible(true);
-    } else if(!trackerSelect.year && trackerSelect.month) {
-      setIsYearErrorVisible(true);
-      setIsMonthErrorVisible(false);
-    } else if(trackerSelect.year && !trackerSelect.month) {
-      setIsYearErrorVisible(false);
-      setIsMonthErrorVisible(true);
-    } else {
-
-      const getDaysArray = (year, monthId) => {
-        return [...Array(new Date(year, parseInt(monthId) + 1, 0).getDate())].map((_, index) => {
-          const currentDate = new Date(year, parseInt(monthId), index + 1);
-          return {
-            date: currentDate,
-            name: currentDate.toLocaleDateString("en-US", {weekday: "long"}),
-            dayOfTheMonth: index + 1,
-            journal: {
-              habitsLog: []
-            }
-          }
-        })
-      }
-
-      setTrackersList(previousState =>
-        previousState.some(tracker => tracker.year === trackerSelect.year)
-        ? previousState.map(tracker =>
-          tracker.year === trackerSelect.year
-          ? {
-              ...tracker, 
-              months: tracker.months.some(month => month.name === trackerSelect.month.name)
-              ? [...tracker.months]
-              : [
-                ...tracker.months,
-                {
-                  name: trackerSelect.month.name,
-                  id: trackerSelect.month.id,
-                  habits: [],
-                  days: getDaysArray(trackerSelect.year, trackerSelect.month.id)
-                }
-              ].sort((a,b) => a.id - b.id)
-            }
-          : tracker
-        )
-        : [
-          ...previousState,
-          {
-            year: trackerSelect.year,
-            months: [
-              {
-                name: trackerSelect.month.name,
-                id: trackerSelect.month.id,
-                habits: [],
-                days: getDaysArray(trackerSelect.year, trackerSelect.month.id)
-              }
-            ]
-          }
-        ].sort((a,b) => a.year - b.year)
-      );
-      
-      setIsYearErrorVisible(false);
-      setIsMonthErrorVisible(false);
-      setMonthTogglerText("Month");
-      setYearTogglerText("Year");
-      setTrackerSelect({});
-    }
   }
 
   const handleCreateTrackerBackend = async () => {
@@ -233,7 +157,6 @@ function Create() {
           : tracker
         ).filter(tracker => tracker.months.length !== 0)
       );
-      console.log( data )
     } catch(error) {
       console.log( error );
     }
@@ -279,7 +202,6 @@ function Create() {
           }, {})
         );
 
-        console.log( "Tracker Data: ", data );
         setUserTrackers(organizedData);
       } catch(error) {
         console.log( error )
@@ -296,42 +218,7 @@ function Create() {
       }
     })
 
-    console.log( "User Trackers: ", userTrackers )
-    console.log( "User Tracker Dropdown Refs: ", userTrackerDropdownRefs.current );
   }, [userTrackers]);
-
-  useEffect(() => {
-    console.log( "User Tracker Dropdowns: ", userTrackerDropdowns )
-  }, [userTrackerDropdowns]);
-
-  useEffect(() => {
-    console.log( `Tracker Select: `, trackerSelect )
-  }, [trackerSelect]);
-
-  // useEffect(() => {
-  //   console.log( trackerDropdowns )
-  // }, [trackerDropdowns]);
-
-  useEffect(()=> {
-    console.log( trackerDeleteSelected )
-  },[trackerDeleteSelected]);
-
-  // useEffect(() => {
-    
-  //   trackersList.length !== 0 && localStorage.setItem("trackersList", JSON.stringify(trackersList));
-  //   trackersList.length === 0 && localStorage.removeItem("trackersList");
-
-  //   trackersList.forEach(tracker => {
-  //     const year = tracker.year;
-  //     const dropdown = trackerDropdownRefs.current[`trackerDropdown${year}`].current;
-  //     if(
-  //       trackerDropdowns[`isOpen${year}`] &&
-  //       dropdown
-  //     ) {
-  //       dropdown.style.maxHeight = `${dropdown.scrollHeight}px`
-  //     }
-  //   });
-  // }, [trackersList]);
 
   useEffect(() => {
     const handleClickOutsideMonthDropdown = (event) => {
@@ -563,7 +450,6 @@ function Create() {
               <button
                 className="create-tracker__create-btn"
                 onClick={() => {
-                  // handleCreateTracker();
                   handleCreateTrackerBackend();
                 }}
               >Create</button>
@@ -641,68 +527,6 @@ function Create() {
                 </div>
               )
             })}
-
-            {/* {trackersList.map((obj, trackerDropdownIndex) => {
-              if(!trackerDropdownRefs.current[`trackerDropdown${obj.year}`]) {
-                trackerDropdownRefs.current[`trackerDropdown${obj.year}`] = createRef();
-              }
-              return (
-                <div className="tracker-dropdown" key={trackerDropdownIndex}>
-                  <button 
-                    className="tracker-dropdown__year-toggler"
-                    onClick={() => {
-                      setTrackerDropdowns(previousState => {
-                        const closedDropdowns = 
-                          Object.entries(previousState)
-                          .reduce((acc, [key, value]) => {
-                            acc[key] = false;
-                            return acc;
-                          }, {});
-                        if(previousState[`isOpen${obj.year}`]) {
-                          return closedDropdowns;
-                        } else {
-                          return {...closedDropdowns, [`isOpen${obj.year}`]: true}
-                        }
-                      });
-                    }}
-                    style={{
-                      marginBottom: trackerDropdowns[`isOpen${obj.year}`] ? "2rem" : "0rem"
-                    }}
-                  >
-                    {obj.year}
-                    <img 
-                      src={caretIcon} alt="Caret arrow." 
-                      className={`tracker-dropdown__year-toggler-caret-icon ${trackerDropdowns[`isOpen${obj.year}`] ? "tracker-dropdown__year-toggler-caret-icon--rotate" : ""}`}
-                      /> 
-                  </button>
-                  <ul 
-                    className="tracker-dropdown__list"
-                    ref={trackerDropdownRefs.current[`trackerDropdown${obj.year}`]}
-                    style={{
-                      maxHeight: trackerDropdowns[`isOpen${obj.year}`] && trackerDropdownRefs.current[`trackerDropdown${obj.year}`].current ? `${trackerDropdownRefs.current[`trackerDropdown${obj.year}`].current.scrollHeight}px` : "0px",
-                    }}
-                  >
-                    {obj.months.map((month, trackerItemIndex) => (
-                      <li className="tracker-dropdown__item" key={trackerItemIndex}>
-                        <Link to={`/view?year=${obj.year}&month=${month.name}&monthid=${month.id}`} className="tracker-dropdown__link">
-                          <img src={linkArrowIcon} alt="Link arrow icon." className="tracker-dropdown__link-arrow-icon" />
-                          {month.name}
-                        </Link>
-                        <button
-                          className="tracker-dropdown__trash-btn"
-                          onClick={() => {
-                            setTrackerDeleteSelected({year: obj.year, month })
-                            setIsDeleteModalOpen(true);
-                          }}
-                        >
-                          <img src={trashIcon} alt="Trash icon." className="tracker-dropdown__trash-btn-icon" />
-                        </button>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              )
-            })} */}
 
           </div>
 

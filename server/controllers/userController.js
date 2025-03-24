@@ -21,16 +21,5 @@ module.exports = {
     } catch(error) {
       res.status(500).json({message: "Server Error", error})
     }
-  },
-  async getAllUsers(req, res) {
-    try{
-      const users = await User.find({}).populate("trackers");
-      if(!users) {
-        return res.status(400).json({message: "Unable to get Users."});
-      }
-      res.status(200).json(users);
-    } catch(error) {
-      res.status(500).json({message: "Server Error", error: error.message});
-    }
-  },
+  }
 }

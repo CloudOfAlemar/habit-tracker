@@ -1,7 +1,7 @@
 
 
 import { Link, useLocation } from 'react-router-dom';
-import { useState, useRef, useEffect, useMemo, createRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { getUserTrackers, updateHabits, updateJournalHabits } from "../../utils/api";
 import './View.scss';
 
@@ -30,10 +30,6 @@ function View() {
 
   // React Hook - useState: changes to state variables trigger UI re-renders
   // to reflect the updated data.
-  const [trackersList, setTrackersList] = useState(() => {
-    const trackersListStorage = localStorage.getItem("trackersList");
-    return trackersListStorage ? JSON.parse(trackersListStorage) : [];
-  });
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [isNewHabitModalOpen, setIsNewHabitModalOpen] = useState(false);
   const [isJournalOpen, setIsJournalOpen] = useState(false);
@@ -45,30 +41,6 @@ function View() {
 
   const [currentTracker, setCurrentTracker] = useState({});
   const [userTrackers, setUserTrackers] = useState([]);
-
-  // React Hook - useMemo: used to recompute a value with a heavy calculation
-  // only when the dependency changes and NOT on every render.
-  const data = useMemo(() => {
-    const year = queryParams.get("year");
-    const month = queryParams.get("month");
-    const monthId = queryParams.get("monthId");
-    const currentHabits = () => {
-      return trackersList.find(tracker => tracker.year === data.year)
-        ?.months.find(month => month.name === data.month)?.habits || [];
-    }
-    const currentDays = () => {
-      return trackersList.find(tracker => tracker.year === data.year)
-        ?.months.find(month => month.name === data.month)?.days || [];
-    }
-
-    return {
-      year,
-      month,
-      monthId,
-      currentHabits,
-      currentDays
-    }
-  });
 
   // Functions
   const getSingleChartRowsCount = () => {
@@ -141,7 +113,6 @@ function View() {
 
         setUserTrackers(sortedTrackersData);
         setCurrentTracker(userTrackersData.find(tracker => tracker._id === queryParams.get("trackerId")));
-        console.log( "User Trackers Data: ", userTrackersData );
       } catch(error) {
         console.log( error )
       }
@@ -158,7 +129,6 @@ function View() {
           currentTracker.days
         );
         const updatedTracker = await response.json();
-        console.log( "Upated Tracker: ", updatedTracker );
       }catch(error) {
         console.log( error );
       }
@@ -176,7 +146,6 @@ function View() {
         setCurrentTracker({
           ...updatedTracker
         })
-        console.log( "Updated Tracker: journal habits: ", updatedTracker )
       }catch(error) {
         console.log( error )
       }
@@ -196,24 +165,7 @@ function View() {
         noteInputRefs.current[index] = null;
       }
     });
-    console.log( "Note Input Refs: ", noteInputRefs.current );
   }, [currentEditJournalData.journalHabits]);
-
-  useEffect(() => {
-    console.log( "Current Edit Journal Data: ", currentEditJournalData )
-  }, [currentEditJournalData]);
-
-  useEffect(() => {
-    console.log( "Current Tracker: ", currentTracker );
-  }, [currentTracker]);
-
-  useEffect(() => {
-    console.log( "User Trackers: ", userTrackers );
-  }, [userTrackers]);
-
-  useEffect(() => {
-    trackersList.length > 0 && localStorage.setItem("trackersList", JSON.stringify(trackersList));
-  }, [trackersList]);
 
   useEffect(() => {
     if(!isNewHabitModalOpen) {

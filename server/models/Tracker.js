@@ -40,34 +40,3 @@ const trackerSchema = new Schema({
 const Tracker = model("Tracker", trackerSchema);
 
 module.exports = Tracker;
-
-// const obj = 
-// {
-//   year: 2025,
-//   months: [
-//     {
-//       name: "March",
-//       id: 2,
-//       habits: ["Build Projects", "Learn New Technology", "Workout"],
-//       days: [
-//         {
-//           name: "Tuesday",
-//           dayOfTheMonth: 11,
-//           date: "2025-03-11T07:00:00.000Z",
-//           journal: {
-//             habitsLog: [
-//               {
-//                 title: "Build Projects",
-//                 status: "green",
-//                 notes: [
-//                   "Note text One",
-//                   "Note text Two"
-//                 ]
-//               }
-//             ]
-//           }
-//         }
-//       ]
-//     }
-//   ]
-// }
