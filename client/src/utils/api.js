@@ -75,3 +75,15 @@ export const updateHabits = (trackerId, habits, days) => {
     body: JSON.stringify({trackerId, habits, days})
   });
 }
+
+export const updateJournalHabits = (trackerId, dayId, journalHabits) => {
+  const token = localStorage.getItem("token");
+  return fetch("/api/trackers/journalHabits", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`
+    },
+    body: JSON.stringify({trackerId, dayId, journalHabits})
+  });
+}

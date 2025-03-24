@@ -1,3 +1,4 @@
+
 const {Tracker, User} = require("../models");
 
 module.exports = {
@@ -83,6 +84,25 @@ module.exports = {
       
     } catch(error) {
       res.status(500).json({message: "Server Error: Failed to update habit", error: error.message});
+    }
+  },
+  async updateJournalHabits(req, res) {
+    try{
+      const {trackerId, dayId, journalHabits} = req.body;
+      const updatedTracker = await Tracker.findOneAndUpdate(
+        {_id: trackerId, "days._id": dayId},
+        {$set: {"days.$.journalHabits": journalHabits}},
+        {new: true}
+      );
+
+      //NOTE: fix
+      if(!updatedTracker) {
+        return res.status(400).json({message: "Failed to update journal habits"});
+      }
+
+      res.status(200).json(updatedTracker);
+    } catch(error) {
+      res.status(500).json({message: "Server Error: Failed to update journal habits", error: error.message});
     }
   }
 }

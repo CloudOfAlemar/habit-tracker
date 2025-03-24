@@ -2,7 +2,7 @@
 
 import { Link, useLocation } from 'react-router-dom';
 import { useState, useRef, useEffect, useMemo, createRef } from 'react';
-import { getUserTrackers, updateHabits } from "../../utils/api";
+import { getUserTrackers, updateHabits, updateJournalHabits } from "../../utils/api";
 import './View.scss';
 
 import caretIcon from '../../assets/caret-icon.svg';
@@ -77,48 +77,16 @@ function View() {
     return incompleteRows ? completeRows + 1 : completeRows;
   }
 
-  // const deleteHabit = (habitToDelete) => {
-  //   setTrackersList(previousState => 
-  //     previousState.map(tracker => 
-  //       tracker.year === data.year ?
-  //       {
-  //         ...tracker,
-  //         months: tracker.months.map(month => 
-  //           month.name === data.month
-  //           ? {
-  //             ...month,
-  //             habits: month.habits.filter(habit => 
-  //               habit !== habitToDelete
-  //             ),
-  //             days: month.days.map(day => ({
-  //               ...day,
-  //               journal: {
-  //                 habitsLog : day.journal.habitsLog.filter(habitLog => 
-  //                   habitLog.title !== habitToDelete
-  //                 )
-  //               }
-  //             }))
-  //           }
-  //           : month
-  //         )
-  //       } :
-  //       tracker
-  //     )
-  //   )
-  // }
-
-
-
   const updateEditJournalStatus = (event, habitLog) => {
     const status = event.target.dataset.statusColor;
-    const habitLogStatus = habitLog.status;
+    const habitLogStatus = habitLog.habitStatus;
     setCurrentEditJournalData(previousState => ({
       ...previousState,
-      habitsLog: previousState.habitsLog.map(log => 
-        log.title === habitLog.title
+      journalHabits: previousState.journalHabits.map(log => 
+        log.habitTitle === habitLog.habitTitle
         ? {
           ...log,
-          status: status === habitLogStatus ? "" : status
+          habitStatus: status === habitLogStatus ? "" : status
         }
         : log
       )
@@ -199,6 +167,41 @@ function View() {
       updateHabitsBackend();
     }
   }, [currentTracker?.habits]);
+
+  useEffect(() => {
+    const updateJournalHabitsBackend = async (trackerId, dayId, journalHabits) => {
+      try{
+        const response = await updateJournalHabits(trackerId, dayId, journalHabits);
+        const updatedTracker = await response.json();
+        setCurrentTracker({
+          ...updatedTracker
+        })
+        console.log( "Updated Tracker: journal habits: ", updatedTracker )
+      }catch(error) {
+        console.log( error )
+      }
+    }
+    if(currentEditJournalData.journalHabits) {
+      updateJournalHabitsBackend(
+        currentTracker._id,
+        currentJournalData.dayId,
+        currentJournalData.journalHabits
+      );
+    }
+  }, [currentJournalData.journalHabits]);
+
+  useEffect(() => {
+    currentTracker.habits?.forEach((_, index) => {
+      if(!noteInputRefs.current[index]) {
+        noteInputRefs.current[index] = null;
+      }
+    });
+    console.log( "Note Input Refs: ", noteInputRefs.current );
+  }, [currentEditJournalData.journalHabits]);
+
+  useEffect(() => {
+    console.log( "Current Edit Journal Data: ", currentEditJournalData )
+  }, [currentEditJournalData]);
 
   useEffect(() => {
     console.log( "Current Tracker: ", currentTracker );
@@ -286,19 +289,6 @@ function View() {
                       </Link>
                     </li>
                   ))}
-
-                {/* {trackersList.flatMap(tracker =>
-                  tracker.months.map(({name, id}) => (
-                    <li className="view-dropdown__item" key={`${tracker.year}-${id}`}>
-                      <Link 
-                        to={`/view?year=${tracker.year}&month=${name}&monthId=${id}`} 
-                        className="view-dropdown__option"
-                        onClick={() => setIsDropdownOpen(previousState => !previousState)}  
-                      >{`${name} ${tracker.year}`}
-                      </Link>
-                    </li>
-                  ))
-                )} */}
               </ul>
             </div>
 
@@ -338,12 +328,31 @@ function View() {
                 <div className="full-chart__tracking-side-header">
 
                   {currentTracker?.days?.map((trackerDay, index) => {
-                    const dayOfMonth = new Date(trackerDay.date).toLocaleDateString("en-US", {day: "2-digit"});
+                    const date = new Date(trackerDay.date);
+                    const year = date.getFullYear();
+                    const shortMonth = date.toLocaleDateString("en-US", {month: "short"});
+                    const shortWeekday = date.toLocaleDateString("en-US", {weekday: "short"});
+                    const journalHabits = [...trackerDay.journalHabits];
+                    const dayOfMonth = date.toLocaleDateString("en-US", {day: "2-digit"});
                     const dayLetter = trackerDay?.day?.charAt(0);
+                    const dayId = trackerDay._id;
                     return (
                       <div className="full-chart__pill" key={index}>
                         <button 
                           className="full-chart__journal-btn"
+                          onClick={() => {
+                            setCurrentJournalData(() => {
+                              return {
+                                year,
+                                shortMonth,
+                                shortWeekday,
+                                twoDigitDay: dayOfMonth,
+                                journalHabits,
+                                dayId
+                              }
+                            });
+                            setIsJournalOpen(true);
+                          }}
                         >
                           <img src={editIcon} alt="Edit icon." className="full-chart__edit-icon" />
                         </button>
@@ -468,7 +477,7 @@ function View() {
 
           </div>
 
-          {(data.currentHabits().length === 0 && data.year) && (
+          {currentTracker?.habits?.length === 0 && (
             <div className="missing-single-chart">
               <div className="missing-single-chart__img-wrapper">
                 <img 
@@ -534,7 +543,7 @@ function View() {
           {/* Journal Modal Body */}
           <div className="journal-modal__body">
 
-            {currentJournalData.habitsLog?.map((log, index) => {
+            {currentJournalData?.journalHabits?.map((log, index) => {
               return (
                 <div className="journal-modal-habit" key={index}>
                   <div className="journal-modal-habit__header">
@@ -543,11 +552,11 @@ function View() {
                         className="journal-modal-habit__status-bullet"
                         style={{
                           backgroundColor: `${
-                            log.status === "green"
+                            log.habitStatus === "green"
                             ? "#C9FFC8"
-                            : log.status === "yellow"
+                            : log.habitStatus === "yellow"
                             ? "#FFFEC8"
-                            : log.status === "red"
+                            : log.habitStatus === "red"
                             ? "#FFE3E9"
                             : "transparent"
                           }`
@@ -555,12 +564,12 @@ function View() {
                       ></span>
                     </div>
                     <h3 className="journal-modal-habit__heading">
-                      {log.title}
+                      {log.habitTitle}
                     </h3>
                   </div>
                   <ul className="journal-modal-habit__note-list">
   
-                    {log.notes.map((note, index) => (
+                    {log.habitNotes?.map((note, index) => (
                       <li className="journal-modal-habit__note-item" key={index}>
                         <p className="journal-modal-habit__note">
                           {note}
@@ -612,10 +621,7 @@ function View() {
           {/* Edit Journal Modal Body */}
           <div className="edit-journal-modal__body">
 
-            {currentEditJournalData.habitsLog?.map((habitLog, index) => {
-              if(!noteInputRefs.current[index]) {
-                noteInputRefs.current[index] = createRef();
-              }
+            {currentEditJournalData.journalHabits?.map((habitLog, index) => {
               return (
                 <div className="edit-journal-modal-habit" key={index}>
 
@@ -629,7 +635,7 @@ function View() {
                           updateEditJournalStatus(event, habitLog);
                         }}
                         style={{
-                          border: `${habitLog.status === "green" ? "2px solid #6C63FF" : "1px solid #A29CBB"}`
+                          border: `${habitLog.habitStatus === "green" ? "2px solid #6C63FF" : "1px solid #A29CBB"}`
                         }}
                       ></span>
                       <span 
@@ -639,7 +645,7 @@ function View() {
                           updateEditJournalStatus(event, habitLog);
                         }}
                         style={{
-                          border: `${habitLog.status === "yellow" ? "2px solid #6C63FF" : "1px solid #A29CBB"}`
+                          border: `${habitLog.habitStatus === "yellow" ? "2px solid #6C63FF" : "1px solid #A29CBB"}`
                         }}
                       ></span>
                       <span 
@@ -649,7 +655,7 @@ function View() {
                           updateEditJournalStatus(event, habitLog);
                         }} 
                         style={{
-                          border: `${habitLog.status === "red" ? "2px solid #6C63FF" : "1px solid #A29CBB"}`
+                          border: `${habitLog.habitStatus === "red" ? "2px solid #6C63FF" : "1px solid #A29CBB"}`
                         }}
                       ></span>
                     </div>
@@ -667,13 +673,13 @@ function View() {
                     </div>
 
                     <h3 className="edit-journal-modal-habit__heading">
-                      {habitLog.title}
+                      {habitLog.habitTitle}
                     </h3>
                   </div>
 
                   {/* Edit Journal Modal Habit Note List */}
                   <ul className="edit-journal-modal-habit__note-list">
-                    {habitLog.notes?.map((note, index) => (
+                    {habitLog.habitNotes?.map((note, index) => (
                       <li className="edit-journal-modal-habit__note-item" key={index}>
                         <div className="edit-journal-modal-habit__note-content-wrapper">
                           <p className="edit-journal-modal-habit__note">
@@ -684,11 +690,11 @@ function View() {
                             onClick={() => {
                               setCurrentEditJournalData(previousState => ({
                                 ...previousState,
-                                habitsLog: previousState.habitsLog.map(log => 
-                                  log.title === habitLog.title
+                                journalHabits: previousState.journalHabits.map(log => 
+                                  log.habitTitle === habitLog.habitTitle
                                   ? {
                                     ...log,
-                                    notes: log.notes.filter(logNote => 
+                                    habitNotes: log.habitNotes.filter(logNote => 
                                       logNote !== note
                                     )
                                   }
@@ -707,7 +713,7 @@ function View() {
                   {/* Edit Journal Modal Habit Footer */}
                   <div className="edit-journal-modal-habit__footer">
                     <textarea
-                      ref={noteInputRefs.current[index]}
+                      ref={(element) => noteInputRefs.current[index] = element}
                       name="" id=""
                       rows="3"
                       className="edit-journal-modal-habit__note-input"
@@ -716,17 +722,18 @@ function View() {
                     <button 
                       className="edit-journal-modal-habit__add-note-btn"
                       onClick={() => {
-                        const inputValue = noteInputRefs.current[index].current.value.trim();
+                        const inputValue = noteInputRefs.current[index].value.trim();
+                        
                         if(inputValue) {
                           setCurrentEditJournalData(previousState => {
                             return {
                               ...previousState,
-                              habitsLog: previousState.habitsLog.map(log => 
-                                log.title === habitLog.title
+                              journalHabits: previousState.journalHabits.map(log => 
+                                log.habitTitle === habitLog.habitTitle
                                 ? {
                                   ...log,
-                                  notes: [
-                                    ...log.notes,
+                                  habitNotes: [
+                                    ...log.habitNotes,
                                     inputValue
                                   ]
                                 }
@@ -734,7 +741,7 @@ function View() {
                               )
                             }
                           });
-                          noteInputRefs.current[index].current.value = "";
+                          noteInputRefs.current[index].value = "";
                         }
                       }}
                     >
@@ -753,39 +760,9 @@ function View() {
             <button 
               className="edit-journal-modal__save-btn"
               onClick={() => {
-                setTrackersList(previousState => 
-                  previousState.map(tracker => 
-                    tracker.year === data.year
-                    ? {
-                      ...tracker,
-                      months: tracker.months.map(month => 
-                        month.name === data.month
-                        ? {
-                          ...month,
-                          days: month.days.map(day => 
-                            // instead of weekday use day of the month
-                            day.dayOfTheMonth === currentEditJournalData.dayOfTheMonth
-                            ? {
-                              ...day,
-                              journal: {
-                                habitsLog: [
-                                  ...currentEditJournalData.habitsLog
-                                ]
-                              }
-                            }
-                            : day
-                          )
-                        }
-                        : month
-                      )
-                    }
-                    : tracker
-                  )
-                );
-                setCurrentJournalData(previousState => ({
-                  ...previousState,
-                  habitsLog: [...currentEditJournalData.habitsLog]
-                }));
+                setCurrentJournalData({
+                  ...currentEditJournalData
+                });
                 setIsEditJournalOpen(previousState => !previousState);
                 setIsJournalOpen(previousState => !previousState);
               }}
@@ -813,7 +790,6 @@ function View() {
             <button 
               className="delete-habit-modal__delete-btn"
               onClick={() => {
-                // deleteHabit(habitToDelete);
                 handleDeleteHabit(habitToDelete);
                 setIsDeleteHabitModalOpen(previousState => !previousState);
               }}
