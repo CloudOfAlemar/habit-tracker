@@ -1,5 +1,7 @@
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://localhost:3001";
+
 export const createUser = (username, password) => {
-  return fetch("/api/users", {
+  return fetch(`${API_BASE_URL}/api/users`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json"
@@ -12,7 +14,7 @@ export const createUser = (username, password) => {
 }
 
 export const login = (username, password) => {
-  return fetch("/api/auth/login", {
+  return fetch(`${API_BASE_URL}/api/auth/login`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json"
@@ -26,7 +28,7 @@ export const login = (username, password) => {
 
 export const createTracker = (year, month, monthIndex, daysToInsert) => {
   const token = localStorage.getItem("token");
-  return fetch("/api/trackers", {
+  return fetch(`${API_BASE_URL}/api/trackers`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -43,7 +45,7 @@ export const createTracker = (year, month, monthIndex, daysToInsert) => {
 
 export const deleteTracker = (trackerId) => {
   const token = localStorage.getItem("token");
-  return fetch("/api/trackers/delete", {
+  return fetch(`${API_BASE_URL}/api/trackers/delete`, {
     method: "POST",
     headers: {
       "Content-Type" : "application/json",
@@ -55,7 +57,7 @@ export const deleteTracker = (trackerId) => {
 
 export const getUserTrackers = () => {
   const token = localStorage.getItem("token");
-  return fetch("/api/trackers/user", {
+  return fetch(`${API_BASE_URL}/api/trackers/user`, {
     method: "GET",
     headers: {
       "Content-Type": "application/json",
@@ -66,7 +68,7 @@ export const getUserTrackers = () => {
 
 export const updateHabits = (trackerId, habits, days) => {
   const token = localStorage.getItem("token");
-  return fetch("/api/trackers/habits", {
+  return fetch(`${API_BASE_URL}/api/trackers/habits`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -78,7 +80,7 @@ export const updateHabits = (trackerId, habits, days) => {
 
 export const updateJournalHabits = (trackerId, dayId, journalHabits) => {
   const token = localStorage.getItem("token");
-  return fetch("/api/trackers/journalHabits", {
+  return fetch(`${API_BASE_URL}/api/trackers/journalHabits`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
