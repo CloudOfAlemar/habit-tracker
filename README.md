@@ -22,7 +22,7 @@ applying what I’ve learned to future projects!
 - Vite (Build Tool)
 
 ## Links
-
+[Link to Live Site: Habit Tracker](https://alemar-habit-tracker.netlify.app/)
 
 ## Screenshots
 ![Home Page](./screenshots/Screenshot%202025-03-24%20at%203.02.56 PM.png)
